@@ -11,7 +11,7 @@ const navIcons = [
 
 const Navbar = () => {
   return (
-    <header className='w-full bg-[#E7E3E0] rounded-10 sticky top-10 z-10'>
+    <header className='w-full bg-[#8ba874] rounded-10 sticky top-5 z-10'>
       <nav className='nav'>
         <Link href='/' className='flex items-center gap-1'>
           <Image
