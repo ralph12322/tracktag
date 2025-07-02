@@ -10,31 +10,35 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      // Optional: initiate DB (you can remove this if backend already auto-connects)
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
 
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+    const data = await res.json();
+    console.log('Login response:', data);
 
-      const data = await res.json();
-      console.log('Login response:', data);
-
-      if (res.ok) {
-        alert('✅ Login successful!');
-        router.push('/');
+    if (res.ok) {
+      alert('✅ Login successful!');
+      
+      if (data.role === 'Admin') {
+        router.push('/auth/admin');
       } else {
-        alert(`❌ ${data.error}`);
+        router.push('/');
       }
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('❌ Login failed. Please try again.');
+    } else {
+      alert(`❌ ${data.error}`);
     }
-  };
+  } catch (error) {
+    console.error('Login failed:', error);
+    alert('❌ Login failed. Please try again.');
+  }
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white px-4">

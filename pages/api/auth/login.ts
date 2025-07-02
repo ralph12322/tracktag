@@ -7,8 +7,7 @@ import { connectToDB } from '../start';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  await connectToDB(); 
-
+  await connectToDB();
   const { username, password } = req.body;
 
   const user = await User.findOne({ username });
@@ -17,8 +16,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
-  const token = generateToken(user._id.toString());
+  const token = generateToken(user);
 
-  res.setHeader('Set-Cookie', `authToken=${token}; HttpOnly; Path=/; Max-Age=604800`);
-  res.status(200).json({ message: 'Logged in successfully' });
+  res.setHeader(
+    'Set-Cookie',
+    `authToken=${token}; HttpOnly; Path=/; Max-Age=604800; SameSite=Strict`
+  );
+  res.status(200).json({ role: user.role });
+
 }
