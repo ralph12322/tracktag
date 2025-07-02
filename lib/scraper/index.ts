@@ -1,10 +1,12 @@
 import dotenv from 'dotenv';
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import axios from 'axios';
 dotenv.config();
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
-puppeteer.use(StealthPlugin());
+const pluginStealth = StealthPlugin();
+
+puppeteer.use(pluginStealth);
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -17,7 +19,7 @@ export async function scrapeProduct(url: string) {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: [`--proxy-server=http=${proxyHost}:${port}`],
     });
 
@@ -87,18 +89,20 @@ export async function scrapeProduct(url: string) {
       console.log('No reCAPTCHA found');
     }
 
-    const title = await page.$eval('h1', (el: { textContent: string; }) => el.textContent?.trim() || '');
+    const title = await page.$eval('h1', (el => el.textContent?.trim() || ''));
 
     let productData = {
       title,
       currentPrice: '',
       originalPrice: '',
       discount: '',
-      imageURL: '',
+      imageUrl: '',
     };
 
     // Lazada
     if (url.includes('lazada.')) {
+
+      await page.waitForSelector('.pdp-price_type_normal', { timeout: 10000 });
       const lazadaPrices = await page.evaluate(() => {
         const currentPrice = document.querySelector('.pdp-price_type_normal')?.textContent?.trim() || '';
         const originalPrice = document.querySelector('.pdp-price_type_deleted')?.textContent?.trim() || '';
@@ -107,33 +111,51 @@ export async function scrapeProduct(url: string) {
       });
 
       const imageUrl = await page.evaluate(() => {
-        return document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
+        const metaTag = document.querySelector('meta[property="og:image"]');
+        return metaTag ? metaTag.getAttribute('content') : '';
       });
 
       productData = {
-        title,
+        title: title || '',
         currentPrice: lazadaPrices.currentPrice,
         originalPrice: lazadaPrices.originalPrice,
         discount: lazadaPrices.discount,
-        imageURL: imageUrl,
+        imageUrl: imageUrl || '',
       };
+
+      const html = await page.content();
+      require('fs').writeFileSync('lazada-debug.html', html);
+      console.log("Lazada Image URL:", productData.imageUrl);
     }
+
+
 
     // Amazon
     if (url.includes('amazon.')) {
       const { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
-        const priceSymbol = document.querySelector('.a-price-symbol')?.textContent?.trim() || '$';
-        const priceWhole = document.querySelector('.a-price-whole')?.textContent?.replace(/[^\d]/g, '') || '0';
-        const priceFraction = document.querySelector('.a-price-fraction')?.textContent?.trim() || '00';
-        const rawTypicalPrice = document.querySelector('span.a-size-small.aok-offscreen')?.textContent?.trim() || '';
-        const match = rawTypicalPrice.match(/\$[\d.,]+/);
-        const typicalPrice = match ? match[0] : '';
-        const discount = document.querySelector('.savingsPercentage')?.textContent?.trim() || '';
+        const extractText = (selector: string) => document.querySelector(selector)?.textContent?.trim() || '';
+
+        // Fallbacks using regex on entire page text
+        const fullText = document.body.innerText;
+        const priceRegex = /\$[\d,.]+/g;
+        const allPrices = fullText.match(priceRegex) || [];
+
+        // Extract current price from visible DOM
+        const priceWhole = document.querySelector('.a-price-whole')?.textContent?.replace(/[^\d]/g, '') || '';
+        const priceFraction = document.querySelector('.a-price-fraction')?.textContent?.trim() || '';
+        const currentPrice = priceWhole ? `$${priceWhole}.${priceFraction || '00'}` : allPrices[0] || '';
+
+        // Extract discount from .savingsPercentage or fallback to % regex
+        const discountRate = extractText('.savingsPercentage') || (fullText.match(/-\d+%/)?.[0] || '');
+
+        // Extract normal/original price from typical price span or second match in price list
+        const rawTypicalPrice = extractText('span.a-size-small.aok-offscreen');
+        const typicalPriceMatch = rawTypicalPrice.match(/\$[\d,.]+/)?.[0] || allPrices.find((p) => p !== currentPrice) || '';
 
         return {
-          currentPrice: `${priceSymbol}${priceWhole}.${priceFraction}`,
-          discountRate: discount,
-          normalPrice: typicalPrice,
+          currentPrice,
+          discountRate,
+          normalPrice: typicalPriceMatch,
         };
       });
 
@@ -147,9 +169,10 @@ export async function scrapeProduct(url: string) {
         currentPrice,
         originalPrice: normalPrice,
         discount: discountRate,
-        imageURL: imageUrl,
+        imageUrl: imageUrl,
       };
     }
+
 
     await browser.close();
     return productData;

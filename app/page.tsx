@@ -1,51 +1,26 @@
-import HeroCarousel from '@/components/HeroCarousel'
-import Searchbar from '@/components/Searchbar'
-import Image from 'next/image'
-import React from 'react'
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import HomeContent from '@/components/HomeContent';
+import { connectToDB } from '@/pages/api/start'; // move db logic here if not yet
+import jwt from 'jsonwebtoken';
 
-const Home = () => {
-  return (
+export default async function HomePage() {
+  await connectToDB(); // Always await DB connection
 
-    <>
-      <section className='px-6 md:px-20 py-24'>
-        <div className='flex max-xl:flex-col gap-16'>
-          <div className='flex flex-col justify-center'>
-            <p className='small-text'>
-              Smarter buyer comes here
-              <Image
-                src='/assets/icons/arrow-right.svg'
-                alt='arrow-right'
-                width={16}
-                height={16}
-              />
-            </p>
+  const cookieStore = await cookies(); // ✅ No need for 'await' here
+  const token = cookieStore.get('authToken')?.value;
 
-            <h1 className='head-text'>
-              Unleash the Power of
-              <span className='text-primary'> TrackTag</span>
-            </h1>
+  if (!token) {
+    redirect('/auth/login');
+  }
 
-            <p className='mt-6 '>
-              “In a world where information is vast and constantly changing, the power no longer lies in having access to data, but in making sense of it. This system empowers online shoppers to go beyond the surface, transforming scattered prices and scattered reviews into meaningful insights, enabling smarter decisions, and ensuring that the best deals are never missed.”
-            </p>
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    // You can pass decoded data to your component if needed
+  } catch (err) {
+    console.error('❌ Invalid or expired token:', err);
+    redirect('/auth/login');
+  }
 
-            <Searchbar/>
-          </div>
-          <HeroCarousel />
-        </div>
-
-      </section>
-      <section className='trending-section'>
-        <h2 className='section-text'>Trending</h2>
-
-        <div className='flex flex-wrap gap-x-8 gap-y-16'>
-          {['Apple Iphone 15', 'Book', 'Sneakers'].map((product) => (
-            <div>{product}</div>
-          ))}
-        </div>
-      </section>
-    </>
-  )
+  return <HomeContent />;
 }
-
-export default Home

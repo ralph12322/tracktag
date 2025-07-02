@@ -11,7 +11,7 @@
 
 @layer base {
   body {
-    @apply font-inter;
+    @apply font-inter bg-[#C5DCD2];
   }
 }
 
