@@ -21,7 +21,7 @@ const Home = () => {
         });
 
         if (!res.ok) throw new Error('Unauthorized');
-        
+
       } catch (err) {
         setError('You must be logged in to view this page.');
         setTimeout(() => router.push('/auth/login'), 1500);
@@ -33,7 +33,7 @@ const Home = () => {
     fetchUser();
   }, [router]);
 
-  if (error) return <h1 className="text-center text-red-500 mt-10">{error}</h1>;
+  if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
 
   return (
     <>
@@ -79,7 +79,7 @@ const Home = () => {
         </div>
       </section>
 
-      <footer className="text-center text-gray-500 text-sm py-4 sticky bottom-0">
+      <footer className="text-center bg-[#eafff6] bg-opacity-50 text-gray-500 text-sm py-4 sticky bottom-0">
         &copy; 2025 TrackTag. All rights reserved. Owned by Mark Ponce & Santos, Ralph
       </footer>
     </>

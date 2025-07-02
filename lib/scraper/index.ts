@@ -97,6 +97,7 @@ export async function scrapeProduct(url: string) {
       originalPrice: '',
       discount: '',
       imageUrl: '',
+      url
     };
 
     // Lazada
@@ -121,6 +122,7 @@ export async function scrapeProduct(url: string) {
         originalPrice: lazadaPrices.originalPrice,
         discount: lazadaPrices.discount,
         imageUrl: imageUrl || '',
+        url
       };
 
       const html = await page.content();
@@ -170,6 +172,7 @@ export async function scrapeProduct(url: string) {
         originalPrice: normalPrice,
         discount: discountRate,
         imageUrl: imageUrl,
+        url
       };
     }
 

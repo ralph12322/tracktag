@@ -47,10 +47,10 @@ export default function LoginPage() {
         toast.success('✅ Login successful!');
         if (data.role === 'Admin') {
           router.push('/auth/admin');
-          setTimeout(() => window.location.reload(), 200);
+          setTimeout(() => window.location.reload(), 2000);
         } else {
           router.push('/auth/admin');
-          setTimeout(() => window.location.reload(), 200);
+          setTimeout(() => window.location.reload(), 2000);
 
 
         }
