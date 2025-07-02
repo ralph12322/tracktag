@@ -1,43 +1,67 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const searchParams = useSearchParams();
 
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+  useEffect(() => {
+    if (!searchParams) return;
 
-    const data = await res.json();
-    console.log('Login response:', data);
+    const reason = searchParams.get('reason');
 
-    if (res.ok) {
-      alert('✅ Login successful!');
-      
-      if (data.role === 'Admin') {
-        router.push('/auth/admin');
-      } else {
-        router.push('/');
-      }
-    } else {
-      alert(`❌ ${data.error}`);
+    if (reason === 'unauthorized') {
+      toast.error('You must be logged in first to access this page.');
+      router.replace('/auth/login'); 
     }
-  } catch (error) {
-    console.error('Login failed:', error);
-    alert('❌ Login failed. Please try again.');
-  }
-};
+
+    if (reason === 'expired') {
+      toast.error('Your session has expired. Please log in again.');
+      router.replace('/auth/login'); 
+    }
+  }, [searchParams, router]);
+
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      console.log('Login response:', data);
+
+      if (res.ok) {
+        toast.success('✅ Login successful!');
+        if (data.role === 'Admin') {
+          router.push('/auth/admin');
+          setTimeout(() => window.location.reload(), 110);
+        } else {
+          router.push('/auth/admin');
+          setTimeout(() => window.location.reload(), 110);
+
+
+        }
+      } else {
+        toast.error(`❌ ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error('❌ Login failed. Please try again.');
+    }
+  };
 
 
   return (

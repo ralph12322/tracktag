@@ -88,7 +88,6 @@ const Searchbar = () => {
         </button>
       </form>
 
-      {/* ✅ Show product after fetching */}
       {product && <DisplayProduct product={product} />}
     </div>
   );

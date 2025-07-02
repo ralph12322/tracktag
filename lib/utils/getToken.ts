@@ -1,4 +1,3 @@
-// utils/getToken.ts
 import { parse } from 'cookie';
 
 export function getTokenFromCookie() {

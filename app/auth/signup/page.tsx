@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function SignupPage() {
   const [username, setUsername] = useState('');
@@ -20,9 +21,9 @@ export default function SignupPage() {
     const data = await res.json();
 
     if (res.ok) {
-      alert('✅ Signup successful!');
+      toast.success('✅ Signup successful!');
     } else {
-      alert(`❌ ${data.error}`);
+      toast.error(`❌ ${data.error}`);
     }
   };
 

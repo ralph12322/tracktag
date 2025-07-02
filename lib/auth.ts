@@ -1,4 +1,3 @@
-// lib/auth.ts
 import jwt from 'jsonwebtoken';
 
 export function generateToken(user: {
