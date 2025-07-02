@@ -51,6 +51,10 @@ const Home = () => {
         </div>
 
       </section>
+      <footer className="text-center text-gray-500 text-sm py-4 sticky bottom-0">
+        &copy; 2025 TrackTag. All rights reserved. Owned by Mark Ponce & Santos, Ralph
+      </footer>
+
     </>
   )
 }
