@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (existing) {
     console.log("⚠️ Product already exists in the database.");
-    return res.status(200).json({ message: 'Product already saved', product: existing });
+    return res.status(200).json(existing);
   }
 
   // Add the URL to the scraped product object

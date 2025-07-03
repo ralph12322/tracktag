@@ -28,7 +28,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
+    <div className="flex mx-60 min-h-screen items-center justify-center bg-white px-4">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">Sign Up for TrackTag</h2>

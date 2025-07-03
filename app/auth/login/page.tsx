@@ -65,7 +65,7 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
+    <div className="flex min-h-screen mx-60 items-center justify-center bg-white px-4">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">Login to TrackTag</h2>
