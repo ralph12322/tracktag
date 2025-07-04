@@ -52,7 +52,7 @@ const Home = () => {
 
             <h1 className='head-text'>
               <span className='text-[#5d80ca]'>Track</span> Smarter,
-              <span className='text-[#5d80ca]'>Tag</span> Better.
+              <br /><span className='text-[#5d80ca]'>Tag</span> Better.
             </h1>
 
             <p className='mt-6'>
