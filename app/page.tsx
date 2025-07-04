@@ -51,7 +51,7 @@ const Home = () => {
             </p>
 
             <h1 className='head-text'>
-              Unleash the Power of
+              Track Smarter. Tag Better.
               <span className='text-[#5d80ca]'> TrackTag</span>
             </h1>
 
