@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { scrapeProduct } from '@/lib/scraper';
 import { Product } from '@/lib/models/product';
+import { connectToDB } from '@/pages/api/start';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -14,29 +15,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-  const product = await scrapeProduct(url);
-  console.log('Scraped product:', product);
+    await connectToDB();
 
-  // Check if the product already exists by its URL
-  const existing = await Product.findOne({ url });
+    const product = await scrapeProduct(url);
+    console.log('Scraped product:', product);
 
-  if (existing) {
-    console.log("⚠️ Product already exists in the database.");
-    return res.status(200).json(existing);
+    if (!product || !product.title) {
+      return res.status(404).json({ error: 'Failed to scrape product or missing title' });
+    }
+
+    const existingProduct = await Product.findOne({ title: product.title });
+
+    if (existingProduct) {
+      return res.status(200).json(existingProduct);
+    }
+
+    const saveProduct = new Product(product);
+    await saveProduct.save();
+
+    console.log('💾 Product saved');
+    return res.status(200).json(saveProduct);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
   }
-
-  // Add the URL to the scraped product object
-  const saveProduct = new Product({ ...product, url });
-
-  if (saveProduct.title) {
-    await saveProduct.save(); // Always await the save
-    console.log("💾 Product saved.");
-  }
-
-  return res.status(200).json(saveProduct);
-
-} catch (error: any) {
-  return res.status(500).json({ error: error.message });
-}
-
 }

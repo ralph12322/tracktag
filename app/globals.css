@@ -11,7 +11,7 @@
 
 @layer base {
   body {
-    @apply font-inter bg-[#C5DCD2];
+    @apply font-inter bg-[#F1F5F9];
   }
 }
 
@@ -116,7 +116,7 @@
   }
 
   .nav-logo {
-    @apply font-spaceGrotesk text-[21px] text-secondary font-bold;
+    @apply font-spaceGrotesk text-[21px] text-white font-bold;
   }
 
   /* PRICE INFO */

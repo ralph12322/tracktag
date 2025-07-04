@@ -64,12 +64,12 @@ const Navbar = () => {
 
   if (role === 'Admin') {
     return (
-      <header className="w-full bg-[#8ba874] rounded-10 sticky top-5 z-10">
+      <header className="w-full bg-slate-600 rounded-10 sticky top-5 z-10">
         <nav className="nav">
           <Link href="/" className="flex items-center gap-1">
             <Image src="/assets/icons/logo.png" width={27} height={27} alt="logo" />
             <p className="nav-logo">
-              Track<span className="text-primary">Tag</span>
+              Track<span className="text-[#5d90ff]">Tag</span>
             </p>
           </Link>
           <NavLinks showAdminLink={true} />
@@ -80,12 +80,12 @@ const Navbar = () => {
 
   
   return (
-    <header className="w-full bg-[#8ba874] rounded-10 sticky top-5 z-10">
+    <header className="w-full bg-slate-600 rounded-10 sticky top-5 z-10">
       <nav className="nav">
         <Link href="/" className="flex items-center gap-1">
           <Image src="/assets/icons/logo.png" width={27} height={27} alt="logo" />
           <p className="nav-logo">
-            Track<span className="text-primary">Tag</span>
+            Track<span className="text-[#5d90ff]">Tag</span>
           </p>
         </Link>
         <NavLinks showAdminLink={false} />

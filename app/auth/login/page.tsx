@@ -15,7 +15,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!searchParams) return;
-
     const reason = searchParams.get('reason');
 
     if (reason === 'unauthorized') {
@@ -44,29 +43,28 @@ export default function LoginPage() {
       console.log('Login response:', data);
 
       if (res.ok) {
-        toast.success('✅ Login successful!');
+        toast.success('Login successful!');
         if (data.role === 'Admin') {
           router.push('/auth/admin');
           setTimeout(() => window.location.reload(), 2000);
         } else {
-          router.push('/auth/admin');
+          router.push('/');
           setTimeout(() => window.location.reload(), 2000);
-
-
         }
       } else {
-        toast.error(`❌ ${data.error}`);
+        toast.error(`${data.error}`);
       }
     } catch (error) {
       console.error('Login failed:', error);
-      toast.error('❌ Login failed. Please try again.');
+      toast.error('Login failed. Please try again.');
     }
   };
 
 
   return (
-    <div className="flex min-h-screen mx-60 items-center justify-center bg-white px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-[#c8d7e6] px-4 drop-shadow-[0_10px_10px_rgba(0,0,255,0.25)] rounded-2xl">
+
+      <div className="max-w-md w-full space-y-9">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">Login to TrackTag</h2>
           <p className="mt-2 text-center text-sm text-gray-600">

@@ -31,7 +31,7 @@ export default function UserProfile() {
         setUser(data.user);
       } catch (err) {
         setError('You must be logged in to view this page.');
-        setTimeout(() => router.push('/auth/login'), 1500);
+        setTimeout(() => router.push('/auth/login'), 2000);
       } finally {
         setLoading(false);
       }
@@ -47,10 +47,10 @@ export default function UserProfile() {
       });
 
       if (res.ok) {
-        toast.success('✅ Logged out!');
+        toast.success('Logged out!');
         router.push('/auth/login');
       } else {
-        toast.error('❌ Failed to log out.');
+        toast.error('Failed to log out.');
       }
     } catch (err) {
       console.error('Logout error:', err);
@@ -66,9 +66,9 @@ export default function UserProfile() {
 
   return (
     <>
-      <div className="bg-white shadow-md w-full rounded-lg p-6 max-w-sm mx-auto mt-10">
+      <div className="bg-white shadow-md rounded-lg p-6 max-w-sm mx-auto mt-10">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-xl">
+          <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-xl">
             {user.username.charAt(0).toUpperCase()}
           </div>
           <h2 className="text-2xl font-semibold text-gray-800">Welcome, {user.username}!</h2>

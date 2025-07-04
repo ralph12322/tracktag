@@ -21,14 +21,15 @@ export default function SignupPage() {
     const data = await res.json();
 
     if (res.ok) {
-      toast.success('✅ Signup successful!');
+      toast.success('Signup successful!');
     } else {
-      toast.error(`❌ ${data.error}`);
+      toast.error(`${data.error}`);
     }
   };
 
   return (
-    <div className="flex mx-60 min-h-screen items-center justify-center bg-white px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#c8d7e6] px-4 drop-shadow-[0_10px_10px_rgba(0,0,255,0.25)] rounded-2xl">
+
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">Sign Up for TrackTag</h2>
@@ -40,7 +41,7 @@ export default function SignupPage() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm">
             <input
               type="text"
               required
@@ -63,7 +64,7 @@ export default function SignupPage() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="t-5 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
           </div>
           <button

@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} ${spaceGrotesk.className}`}>
-        <Toaster position="top-right" />
+        <Toaster position="bottom-right" />
         <main className="max-w-10xl mx-auto">
           <Navbar />
           {children}
