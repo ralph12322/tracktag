@@ -16,18 +16,16 @@ export async function scrapeProduct(url: string) {
 
   try {
 
-    const executablePath =
-      (await chromium.executablePath) ||
-      '/usr/bin/google-chrome';
-
     const browser = await puppeteer.launch({
-      headless: chromium.headless,
-      executablePath,
+      headless: true,
+      executablePath: '/usr/bin/chromium',
       args: [
-        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
+
     const page = await browser.newPage();
 
     await page.authenticate({
