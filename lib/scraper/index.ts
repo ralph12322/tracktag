@@ -1,18 +1,19 @@
-// lib/scraper/index.ts
-
-import chromium from 'chrome-aws-lambda';
 import puppeteer from 'puppeteer-core';
-import axios from 'axios';
+import chromium from 'chrome-aws-lambda';
 
 export async function scrapeProduct(url: string) {
-  if (!url) return;
-
   try {
-    const isDev = process.env.NODE_ENV !== 'production';
+    const executablePath = await chromium.executablePath;
+
+    if (!executablePath) {
+      throw new Error('Chromium executable not found — failed to launch in Vercel.');
+    }
+
     const browser = await puppeteer.launch({
       args: chromium.args,
-      executablePath: await chromium.executablePath || '/usr/bin/chromium-browser',
+      executablePath,
       headless: chromium.headless,
+      defaultViewport: chromium.defaultViewport,
     });
 
     const page = await browser.newPage();
