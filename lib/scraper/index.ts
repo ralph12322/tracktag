@@ -17,14 +17,15 @@ export async function scrapeProduct(url: string) {
   try {
 
     const browser = await puppeteer.launch({
-      headless: true,
       executablePath: '/usr/bin/chromium',
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
+
 
     const page = await browser.newPage();
 
