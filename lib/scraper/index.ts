@@ -16,7 +16,7 @@ export async function scrapeProduct(url: string) {
 
     // ...existing code...
     const browser = await puppeteer.launch({
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
       headless: true,
       args: [
         '--no-sandbox',
