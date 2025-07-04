@@ -26,6 +26,7 @@ export async function scrapeProduct(url: string) {
     });
 
 
+
     const page = await browser.newPage();
 
     await page.authenticate({

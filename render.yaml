@@ -1,3 +1,9 @@
-buildCommand: |
-  apt-get update && apt-get install -y chromium
-  npm install && npm run build
+services:
+  - type: web
+    name: tracktag
+    env: node
+    buildCommand: |
+      apt-get update
+      apt-get install -y chromium
+      npm install && npm run build
+    startCommand: npm run start
