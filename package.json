@@ -3,12 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "patch-package"
-  },
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "postinstall": "patch-package"
+},
+"render": {
+  "buildCommand": "./render-build.sh && npm run build",
+  "startCommand": "npm start"
+},
   "dependencies": {
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",

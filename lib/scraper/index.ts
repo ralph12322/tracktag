@@ -14,8 +14,9 @@ export async function scrapeProduct(url: string) {
 
   try {
 
+    // ...existing code...
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
       headless: true,
       args: [
         '--no-sandbox',
@@ -23,6 +24,7 @@ export async function scrapeProduct(url: string) {
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
+// ...existing code...
 
 
 
