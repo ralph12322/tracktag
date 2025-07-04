@@ -51,8 +51,8 @@ const Home = () => {
             </p>
 
             <h1 className='head-text'>
-              Track Smarter. Tag Better.
-              <span className='text-[#5d80ca]'> TrackTag</span>
+              <span className='text-[#5d80ca]'>Track</span> Smarter,
+              <span className='text-[#5d80ca]'>Tag</span> Better.
             </h1>
 
             <p className='mt-6'>
