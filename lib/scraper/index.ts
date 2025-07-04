@@ -1,8 +1,7 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
-import puppeteer from 'puppeteer-core';
-
+import puppeteer from 'puppeteer';
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
