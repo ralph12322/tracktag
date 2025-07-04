@@ -1,12 +1,9 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
-import puppeteer from 'puppeteer-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
-const pluginStealth = StealthPlugin();
-
-puppeteer.use(pluginStealth);
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -18,13 +15,19 @@ export async function scrapeProduct(url: string) {
   const proxyHost = 'brd.superproxy.io';
 
   try {
+
+    const executablePath =
+      (await chromium.executablePath) ||
+      '/usr/bin/google-chrome';
+
     const browser = await puppeteer.launch({
-      headless: false,
-      executablePath: '/opt/render/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
-      args: [`--proxy-server=http=${proxyHost}:${port}`, '--no-sandbox', '--disable-setuid-sandbox'],
+      headless: chromium.headless,
+      executablePath,
+      args: [
+        ...chromium.args,
+        `--proxy-server=http=${proxyHost}:${port}`,
+      ],
     });
-
-
     const page = await browser.newPage();
 
     await page.authenticate({
