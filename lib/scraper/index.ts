@@ -14,11 +14,17 @@ export async function scrapeProduct(url: string) {
 
   try {
 
+    // ...existing code...
     const browser = await puppeteer.launch({
-      headless: true, // Set to true for headless mode, or false for headed
-      executablePath: puppeteer.executablePath(), // Use Puppeteer's bundled Chromium
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // Use Chromium installed via Docker
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        `--proxy-server=http=${proxyHost}:${port}`,
+      ],
     });
+
     // ...existing code...
 
 
