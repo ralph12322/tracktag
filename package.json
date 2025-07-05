@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "patch-package npx puppeteer browsers install chrome"
+    "postinstall": "patch-package && npx puppeteer browsers install chrome"
   },
   "render": {
-    "buildCommand": "./render-build.sh && npm run build",
+    "buildCommand": "npm run postinstall && npm run build",
     "startCommand": "npm start"
   },
   "dependencies": {
