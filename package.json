@@ -13,6 +13,9 @@
     "buildCommand": "npm run postinstall && npm run build",
     "startCommand": "npm start"
   },
+  "puppeteer": {
+    "cacheDir": ".puppeteer-cache"
+  },
   "dependencies": {
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",

@@ -16,7 +16,7 @@ export async function scrapeProduct(url: string) {
 
     // ...existing code...
     const browser = await puppeteer.launch({
-      headless: new Boolean(process.env.PUPPETEER_HEADLESS).valueOf(),
+      headless: 'new' as any,
       executablePath: puppeteer.executablePath(), // Use Chromium installed via Docker
       args: [
         '--no-sandbox',
