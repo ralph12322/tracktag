@@ -1,0 +1,9 @@
+# Prevent copying unnecessary files into the image
+node_modules
+.dockerignore
+Dockerfile
+docker-compose.yml
+.env
+.git
+.gitignore
+.vscode
