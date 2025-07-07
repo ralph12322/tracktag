@@ -4,22 +4,25 @@ ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
+# Start as root to allow permission changes
+USER root
+
 WORKDIR /usr/src/app
 
-# Copy package files and install dependencies first
+# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy rest of the app files
+# Copy the full project
 COPY . .
 
-# Fix permissions
+# Fix permissions for non-root user
 RUN chown -R pptruser:pptruser /usr/src/app
 
-# Run as the default non-root user again (just to be sure)
+# Switch to non-root user
 USER pptruser
 
-# Build the app
+# Run build
 RUN npm run build
 
 CMD ["npm", "run", "start"]
