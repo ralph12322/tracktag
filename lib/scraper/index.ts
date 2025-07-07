@@ -16,9 +16,6 @@ export async function scrapeProduct(url: string) {
 
   try {
 
-
-    const isProduction = process.env.NODE_ENV === 'production';
-
     const browser = await puppeteer.launch({
       headless: 'new' as any,
       executablePath: puppeteer.executablePath(),
@@ -29,7 +26,7 @@ export async function scrapeProduct(url: string) {
       ],
     });
 
-    // ...existing code...
+  
 
 
 
