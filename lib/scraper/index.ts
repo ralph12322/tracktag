@@ -16,7 +16,7 @@ export async function scrapeProduct(url: string) {
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: puppeteer.executablePath(),
+      executablePath: '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
       dumpio: true,
       args: [
         '--no-sandbox',
@@ -32,7 +32,6 @@ export async function scrapeProduct(url: string) {
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
-
 
 
     const page = await browser.newPage();
