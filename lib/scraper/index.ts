@@ -48,6 +48,12 @@ export async function scrapeProduct(url: string) {
     );
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+    const debugDir = '/opt/render/project/src/debug';
+
+    if (!fs.existsSync(debugDir)) {
+      fs.mkdirSync(debugDir, { recursive: true });
+    }
     await page.screenshot({ path: '/opt/render/project/src/page-debug.png', fullPage: true });
 
     // CAPTCHA Handling
