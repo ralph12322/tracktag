@@ -47,7 +47,8 @@ export async function scrapeProduct(url: string) {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
     );
 
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.screenshot({ path: '/opt/render/project/src/page-debug.png', fullPage: true });
 
     // CAPTCHA Handling
     const frames = page.frames();
@@ -101,8 +102,6 @@ export async function scrapeProduct(url: string) {
     } else {
       console.log('No reCAPTCHA found');
     }
-    const path = '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome';
-    console.log('Chromium path exists?', fs.existsSync(path));
     const title = await page.$eval('h1', (el => el.textContent?.trim() || ''));
 
     let productData = {
