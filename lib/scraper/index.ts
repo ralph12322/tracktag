@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer';
+import chromium from 'chrome-aws-lambda';
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -16,7 +17,7 @@ export async function scrapeProduct(url: string) {
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
+      executablePath: await chromium.executablePath,
       dumpio: true,
       args: [
         '--no-sandbox',
