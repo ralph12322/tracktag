@@ -60,12 +60,9 @@ export async function scrapeProduct(url: string) {
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-    const debugDir = '/opt/render/project/src/debug';
+    const debugPath = path.join(process.cwd(), 'public/debug/page-debug.png') as `${string}.png`;
+    await page.screenshot({ path: debugPath, fullPage: true });
 
-    if (!fs.existsSync(debugDir)) {
-      fs.mkdirSync(debugDir, { recursive: true });
-    }
-    await page.screenshot({ path: '/opt/render/project/src/page-debug.png', fullPage: true });
 
     // CAPTCHA Handling
     const frames = page.frames();
