@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
-import puppeteer from 'puppeteer';
 
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+puppeteer.use(StealthPlugin());
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -100,7 +102,7 @@ export async function scrapeProduct(url: string) {
       console.log('No reCAPTCHA found');
     }
 
-    const title = "title"//await page.$eval('h1', (el => el.textContent?.trim() || ''));
+    const title = await page.$eval('h1', (el => el.textContent?.trim() || ''));
 
     let productData = {
       title,
