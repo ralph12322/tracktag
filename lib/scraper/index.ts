@@ -100,7 +100,7 @@ export async function scrapeProduct(url: string) {
       console.log('No reCAPTCHA found');
     }
 
-    const title = await page.$eval('h1', (el => el.textContent?.trim() || ''));
+    const title = "title"//await page.$eval('h1', (el => el.textContent?.trim() || ''));
 
     let productData = {
       title,
