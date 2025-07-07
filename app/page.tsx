@@ -47,6 +47,7 @@ const Home = () => {
                 alt='arrow-right'
                 width={16}
                 height={16}
+                className='w-auto h-auto'
               />
             </p>
 

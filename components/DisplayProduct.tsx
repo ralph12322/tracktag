@@ -8,6 +8,7 @@ type Product = {
   originalPrice: string;
   discount: string;
   imageUrl: string;
+  url: string;
 };
 
 interface Props {

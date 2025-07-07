@@ -1,28 +1,91 @@
-import puppeteer from 'puppeteer-core';
-import chromium from 'chrome-aws-lambda';
+import dotenv from 'dotenv';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import axios from 'axios';
+dotenv.config();
+
+puppeteer.use(StealthPlugin());
 
 export async function scrapeProduct(url: string) {
+  if (!url) return;
+
+  const username = String(process.env.BRIGHT_DATA_USERNAME);
+  const password = String(process.env.BRIGHT_DATA_PASSWORD);
+  const port = 22225;
+  const session_id = Math.floor(Math.random() * 1000000);
+  const proxyHost = 'brd.superproxy.io';
+
   try {
-    const executablePath = await chromium.executablePath;
-
-    if (!executablePath) {
-      throw new Error('Chromium executable not found — failed to launch in Vercel.');
-    }
-
     const browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath,
-      headless: chromium.headless,
-      defaultViewport: chromium.defaultViewport,
+      headless: true,
+      args: [`--proxy-server=http=${proxyHost}:${port}`],
     });
 
     const page = await browser.newPage();
+
+    await page.authenticate({
+      username: `${username}-session-${session_id}`,
+      password: password,
+    });
 
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
     );
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+    // CAPTCHA Handling
+    const frames = page.frames();
+    let sitekey = '';
+    let recaptchaFrame = null;
+
+    for (const frame of frames) {
+      if (frame.url().includes('api2/anchor')) {
+        recaptchaFrame = frame;
+        const content = await frame.content();
+        const match = content.match(/k=([0-9A-Za-z-_]+)/);
+        if (match) {
+          sitekey = match[1];
+        }
+        break;
+      }
+    }
+
+    if (recaptchaFrame && sitekey) {
+      console.log('reCAPTCHA detected with sitekey:', sitekey);
+      const token = await solveRecaptcha(sitekey, url);
+
+      await page.evaluate((token: string) => {
+        const injectToken = (doc: Document) => {
+          let textarea = doc.getElementById('g-recaptcha-response') as HTMLTextAreaElement | null;
+          if (!textarea) {
+            textarea = doc.createElement('textarea');
+            textarea.id = 'g-recaptcha-response';
+            textarea.name = 'g-recaptcha-response';
+            textarea.style.display = 'none';
+            doc.body.appendChild(textarea);
+          }
+          textarea.value = token;
+        };
+
+        injectToken(document);
+
+        Array.from(window.frames).forEach((frame: Window) => {
+          try {
+            injectToken(frame.document);
+          } catch (e) {}
+        });
+      }, token);
+
+      await page.evaluate(() => {
+        const form = document.querySelector('form');
+        if (form) form.submit();
+      });
+
+      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    } else {
+      console.log('No reCAPTCHA found');
+    }
 
     const title = await page.$eval('h1', el => el.textContent?.trim() || '');
 
@@ -32,13 +95,11 @@ export async function scrapeProduct(url: string) {
       originalPrice: '',
       discount: '',
       imageUrl: '',
-      url,
+      url: url,
     };
 
     // Lazada
     if (url.includes('lazada.')) {
-      await page.waitForSelector('.pdp-price_type_normal', { timeout: 10000 });
-
       const lazadaPrices = await page.evaluate(() => {
         const currentPrice = document.querySelector('.pdp-price_type_normal')?.textContent?.trim() || '';
         const originalPrice = document.querySelector('.pdp-price_type_deleted')?.textContent?.trim() || '';
@@ -47,42 +108,35 @@ export async function scrapeProduct(url: string) {
       });
 
       const imageUrl = await page.evaluate(() => {
-        const metaTag = document.querySelector('meta[property="og:image"]');
-        return metaTag ? metaTag.getAttribute('content') : '';
+        return document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
       });
 
+
       productData = {
-        title: title || '',
+        title,
         currentPrice: lazadaPrices.currentPrice,
         originalPrice: lazadaPrices.originalPrice,
         discount: lazadaPrices.discount,
-        imageUrl: imageUrl || '',
-        url,
+        imageUrl: imageUrl,
+        url: url,
       };
     }
 
     // Amazon
     if (url.includes('amazon.')) {
       const { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
-        const extractText = (selector: string) => document.querySelector(selector)?.textContent?.trim() || '';
-
-        const fullText = document.body.innerText;
-        const priceRegex = /\$[\d,.]+/g;
-        const allPrices = fullText.match(priceRegex) || [];
-
-        const priceWhole = document.querySelector('.a-price-whole')?.textContent?.replace(/[^\d]/g, '') || '';
-        const priceFraction = document.querySelector('.a-price-fraction')?.textContent?.trim() || '';
-        const currentPrice = priceWhole ? `$${priceWhole}.${priceFraction || '00'}` : allPrices[0] || '';
-
-        const discountRate = extractText('.savingsPercentage') || (fullText.match(/-\d+%/)?.[0] || '');
-
-        const rawTypicalPrice = extractText('span.a-size-small.aok-offscreen');
-        const typicalPriceMatch = rawTypicalPrice.match(/\$[\d,.]+/)?.[0] || allPrices.find((p) => p !== currentPrice) || '';
+        const priceSymbol = document.querySelector('.a-price-symbol')?.textContent?.trim() || '$';
+        const priceWhole = document.querySelector('.a-price-whole')?.textContent?.replace(/[^\d]/g, '') || '0';
+        const priceFraction = document.querySelector('.a-price-fraction')?.textContent?.trim() || '00';
+        const rawTypicalPrice = document.querySelector('span.a-size-small.aok-offscreen')?.textContent?.trim() || '';
+        const match = rawTypicalPrice.match(/\$[\d.,]+/);
+        const typicalPrice = match ? match[0] : '';
+        const discount = document.querySelector('.savingsPercentage')?.textContent?.trim() || '';
 
         return {
-          currentPrice,
-          discountRate,
-          normalPrice: typicalPriceMatch,
+          currentPrice: `${priceSymbol}${priceWhole}.${priceFraction}`,
+          discountRate: discount,
+          normalPrice: typicalPrice,
         };
       });
 
@@ -96,14 +150,35 @@ export async function scrapeProduct(url: string) {
         currentPrice,
         originalPrice: normalPrice,
         discount: discountRate,
-        imageUrl,
-        url,
+        imageUrl: imageUrl,
+        url: url,
       };
     }
+
 
     await browser.close();
     return productData;
   } catch (error: any) {
     throw new Error(`Failed to scrape product: ${error.message}`);
   }
+}
+
+async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string> {
+  const API_KEY = process.env.TWO_CAPTCHA_API_KEY;
+  const submitUrl = `http://2captcha.com/in.php?key=${API_KEY}&method=userrecaptcha&googlekey=${sitekey}&pageurl=${pageurl}&json=1`;
+
+  const res = await axios.get(submitUrl);
+  const requestId = res.data.request;
+
+  for (let i = 0; i < 20; i++) {
+    await new Promise((r) => setTimeout(r, 5000));
+    const result = await axios.get(`http://2captcha.com/res.php?key=${API_KEY}&action=get&id=${requestId}&json=1`);
+    if (result.data.status === 1) {
+      return result.data.request;
+    } else if (result.data.request !== 'CAPCHA_NOT_READY') {
+      throw new Error(`2Captcha Error: ${result.data.request}`);
+    }
+  }
+
+  throw new Error('Captcha solve timeout');
 }

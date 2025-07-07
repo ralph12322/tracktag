@@ -9,6 +9,7 @@ type Product = {
   originalPrice: string;
   discount: string;
   imageUrl: string;
+  url: string;
 };
 
 const isValidAmazonProductURL = (url: string) => {
@@ -54,7 +55,8 @@ const Searchbar = () => {
     }
 
     const result = await response.json();
-    setProduct(result);
+    setProduct(result)
+    console.log('Scraped product:', result);
   } catch (error: any) {
     console.error('Scrape error:', error.message);
     alert('Failed to scrape product. Check console for details.');
