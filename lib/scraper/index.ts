@@ -16,10 +16,18 @@ export async function scrapeProduct(url: string) {
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
+      executablePath: puppeteer.executablePath(),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process',
+        '--no-first-run',
+        '--disable-dev-tools',
+        '--no-default-browser-check',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
