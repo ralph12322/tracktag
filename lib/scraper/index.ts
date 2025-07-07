@@ -16,29 +16,17 @@ export async function scrapeProduct(url: string) {
 
   try {
 
-    // ...existing code...
-    const localChromePath = path.join(
-  process.cwd(),
-  '.puppeteer-cache',
-  'chrome',
-  'linux-138.0.7204.92',
-  'chrome-linux64',
-  'chrome'
-);
 
-if (!fs.existsSync(localChromePath)) {
-  throw new Error(`Chrome not found at ${localChromePath}`);
-}
+    const isProduction = process.env.NODE_ENV === 'production';
 
-const browser = await puppeteer.launch({
-  headless: 'new' as any,
-  executablePath: localChromePath,
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    `--proxy-server=http=${proxyHost}:${port}`,
-  ],
-});
+    const browser = await puppeteer.launch({
+      headless: 'new' as any,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        `--proxy-server=http=${proxyHost}:${port}`,
+      ],
+    });
 
     // ...existing code...
 
