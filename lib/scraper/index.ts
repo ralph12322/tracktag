@@ -15,7 +15,7 @@ export async function scrapeProduct(url: string) {
   try {
 
     const browser = await puppeteer.launch({
-      headless: 'new' as any,
+      headless: true,
       executablePath: '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
       args: [
         '--no-sandbox',
