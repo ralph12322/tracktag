@@ -1,20 +1,11 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
-import fs from 'fs';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import express from 'express';
 import path from 'path';
 puppeteer.use(StealthPlugin());
 
-
-const app = express();
-
-app.get('/debug/screenshot', (req, res) => {
-  const filePath = path.join('/opt/render/project/src/page-debug.png');
-  res.sendFile(filePath);
-});
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -240,6 +231,4 @@ async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string>
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Debug server running on port ${PORT}`);
-});
+
