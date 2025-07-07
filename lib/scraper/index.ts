@@ -165,6 +165,7 @@ export async function scrapeProduct(url: string) {
         const rawTypicalPrice = extractText('span.a-size-small.aok-offscreen');
         const typicalPriceMatch = rawTypicalPrice.match(/\$[\d,.]+/)?.[0] || allPrices.find((p) => p !== currentPrice) || '';
 
+
         return {
           currentPrice,
           discountRate,
@@ -176,6 +177,12 @@ export async function scrapeProduct(url: string) {
         const img = document.querySelector('#landingImage') as HTMLImageElement;
         return img?.getAttribute('data-old-hires') || img?.src || '';
       });
+
+      const bodyText = await page.evaluate(() => document.body.innerText);
+      if (bodyText.includes("Enter the characters you see below") || bodyText.includes("Sorry, we just need to make sure you're not a robot")) {
+        throw new Error("Blocked by Amazon CAPTCHA");
+      }
+
 
       productData = {
         title,
