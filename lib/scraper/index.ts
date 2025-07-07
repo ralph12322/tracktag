@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
-
+import fs from 'fs';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 puppeteer.use(StealthPlugin());
@@ -101,7 +101,8 @@ export async function scrapeProduct(url: string) {
     } else {
       console.log('No reCAPTCHA found');
     }
-
+    const path = '/root/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome';
+    console.log('Chromium path exists?', fs.existsSync(path));
     const title = await page.$eval('h1', (el => el.textContent?.trim() || ''));
 
     let productData = {
