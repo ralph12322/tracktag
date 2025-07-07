@@ -27,6 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const existingProduct = await Product.findOne({ title: product.title });
 
     if (existingProduct) {
+      console.log('💾 Product already listed');
       return res.status(200).json(existingProduct);
     }
 
