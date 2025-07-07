@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# Install dependencies for running Chromium
+# Install required libraries for Chromium to run
 RUN apt-get update && apt-get install -y \
   wget \
   ca-certificates \
@@ -18,10 +18,12 @@ RUN apt-get update && apt-get install -y \
   libxcomposite1 \
   libxdamage1 \
   libxrandr2 \
+  libgbm1 \     
   xdg-utils \
   --no-install-recommends && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
+
 
 # Set working directory
 WORKDIR /app
