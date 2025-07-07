@@ -21,6 +21,8 @@ export async function scrapeProduct(url: string) {
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
+      executablePath: isProduction ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
