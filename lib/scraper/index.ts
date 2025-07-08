@@ -21,7 +21,7 @@ export async function scrapeProduct(url: string) {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      // executablePath: '/usr/bin/google-chrome-stable',
+      executablePath: '/usr/bin/google-chrome-stable',
       dumpio: true,
       args: [
         '--no-sandbox',
