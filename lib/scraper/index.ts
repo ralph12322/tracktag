@@ -20,7 +20,7 @@ export async function scrapeProduct(url: string) {
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       executablePath: puppeteer.executablePath(),//'/usr/bin/chromium',
       dumpio: true,
       args: [
