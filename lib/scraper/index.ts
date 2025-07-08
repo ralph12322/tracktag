@@ -1,6 +1,8 @@
-import dotenv from 'dotenv';
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 import axios from 'axios';
-dotenv.config();
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 puppeteer.use(StealthPlugin());
@@ -31,10 +33,10 @@ export async function scrapeProduct(url: string) {
 
     const page = await browser.newPage();
 
-    // await page.authenticate({
-    //   username: `${username}-session-${session_id}`,
-    //   password: password,
-    // });
+    await page.authenticate({
+      username: `${username}-session-${session_id}`,
+      password: password,
+    });
 
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
