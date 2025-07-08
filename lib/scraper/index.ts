@@ -24,14 +24,6 @@ export async function scrapeProduct(url: string) {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--no-zygote',
-        '--single-process',
-        '--no-first-run',
-        '--disable-dev-tools',
-        '--no-default-browser-check',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
