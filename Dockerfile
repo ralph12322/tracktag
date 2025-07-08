@@ -34,4 +34,6 @@ COPY . .
 
 RUN npm run build
 
+RUN which chromium && chromium --version
+
 CMD ["npm", "run", "start"]

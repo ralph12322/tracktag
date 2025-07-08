@@ -3,7 +3,6 @@ import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import path from 'path';
 puppeteer.use(StealthPlugin());
 
 
@@ -224,7 +223,5 @@ async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string>
 
   throw new Error('Captcha solve timeout');
 }
-
-const PORT = process.env.PORT || 3000;
 
 
