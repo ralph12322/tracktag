@@ -26,7 +26,7 @@ export async function scrapeProduct(url: string) {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        `--proxy-server=http=${proxyHost}:${port}`,
+        // `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
 
