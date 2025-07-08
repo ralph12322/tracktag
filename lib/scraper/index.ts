@@ -26,7 +26,7 @@ export async function scrapeProduct(url: string) {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        // `--proxy-server=http=${proxyHost}:${port}`,
+        `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
 
@@ -220,7 +220,7 @@ export async function scrapeProduct(url: string) {
       };
     }
 
-
+    console.log('✅ URLLLLLL:', url);
     await browser.close();
     return productData;
   } catch (error: any) {
