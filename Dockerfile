@@ -1,7 +1,8 @@
 FROM node:20-slim
 
-# Install required libraries for Chromium to run
+# Install required packages + Chromium
 RUN apt-get update && apt-get install -y \
+  chromium \
   wget \
   ca-certificates \
   fonts-liberation \
@@ -24,25 +25,13 @@ RUN apt-get update && apt-get install -y \
   --no-install-recommends && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
-
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files first
 COPY package*.json ./
-
-# Install dependencies (this will include Puppeteer)
 RUN npm ci
 
-# Install bundled Chromium via Puppeteer
-RUN npx puppeteer browsers install chrome
-
-# Copy all app files
 COPY . .
 
-# Build the app
 RUN npm run build
 
-# Run the app
 CMD ["npm", "run", "start"]
