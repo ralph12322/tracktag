@@ -51,10 +51,6 @@ export async function scrapeProduct(url: string) {
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-    const debugPath = path.join(process.cwd(), 'public/debug/page-debug.png') as `${string}.png`;
-    await page.screenshot({ path: debugPath, fullPage: true });
-
-
     // CAPTCHA Handling
     const frames = page.frames();
     let sitekey = '';
