@@ -21,11 +21,18 @@ export async function scrapeProduct(url: string) {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: puppeteer.executablePath(),//'/usr/bin/chromium',
+      // executablePath: '/usr/bin/google-chrome-stable',
       dumpio: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-extensions',
+        '--disable-gpu',
+        '--disable-infobars',
+        '--window-size=1920,1080',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
@@ -41,7 +48,7 @@ export async function scrapeProduct(url: string) {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
     );
 
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
     // CAPTCHA Handling
     const frames = page.frames();
