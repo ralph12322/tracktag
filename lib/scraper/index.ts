@@ -102,35 +102,7 @@ export async function scrapeProduct(url: string) {
     } else {
       console.log('No reCAPTCHA found');
     }
-    let title = '';
-
-    try {
-      // Try primary h1 tag
-      title = await page.$eval('h1', el => el.textContent?.trim() || '');
-    } catch (e) {
-      console.warn('⚠️ No <h1> tag found. Trying fallback title methods.');
-
-      // Fallback 1: Try <title> tag
-      title = await page.title();
-
-      // Fallback 2: Try meta tag
-      if (!title) {
-        try {
-          title = await page.$eval('meta[property="og:title"]', el => el.getAttribute('content') || '');
-        } catch (_) { }
-      }
-
-      // Fallback 3: Try first large heading
-      if (!title) {
-        try {
-          title = await page.$eval('h2, h3', el => el.textContent?.trim() || '');
-        } catch (_) { }
-      }
-
-      // Fallback 4: Log page content for debugging
-      const fallbackHtml = await page.content();
-      require('fs').writeFileSync('fallback-debug.html', fallbackHtml);
-    }
+    const title = await page.$eval('h1', el => el.textContent?.trim() || '');
 
     console.log('📝 Final scraped title:', title);
 
