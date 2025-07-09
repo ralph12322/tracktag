@@ -6,13 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "lint": "next lint"
   },
-  "render": {
-    "buildCommand": "npm run postinstall && npm run build",
-    "startCommand": "npm start"
-  },
+ 
 
   "dependencies": {
     "axios": "^1.10.0",

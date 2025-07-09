@@ -2,8 +2,6 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer';
-import path from 'path';
-import fs from 'fs';
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
