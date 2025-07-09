@@ -17,11 +17,13 @@ export async function scrapeProduct(url: string) {
   try {
 
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const chromePath = puppeteer.executablePath();
+    console.log("Using Chrome executable at:", chromePath);
+
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: puppeteer.executablePath(),
+      executablePath: chromePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
