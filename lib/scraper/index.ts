@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer';
+import { executablePath } from 'puppeteer';
+
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -15,7 +17,7 @@ export async function scrapeProduct(url: string) {
   try {
 
 
-    const chromePath = puppeteer.executablePath();
+    const chromePath = executablePath();
     console.log("Using Chrome executable at:", chromePath);
 
 
