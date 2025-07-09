@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer';
-import { executablePath } from 'puppeteer';
+import fs from 'fs';
 
 
 export async function scrapeProduct(url: string) {
@@ -17,13 +17,19 @@ export async function scrapeProduct(url: string) {
   try {
 
 
-    const chromePath = executablePath();
-    console.log("Using Chrome executable at:", chromePath);
+    const isRender = process.env.RENDER === 'true'; // or any env flag you prefer
 
+    const executablePath = isRender
+      ? '/opt/render/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome'
+      : undefined; // Let Puppeteer decide locally
+
+    if (isRender && executablePath && !fs.existsSync(executablePath)) {
+  console.error('Chrome path not found:', executablePath);
+}
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: 'chrome@138.0.7204.92 /opt/render/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
+      executablePath,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
