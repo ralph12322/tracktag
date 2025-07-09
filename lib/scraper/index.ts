@@ -2,9 +2,6 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 dotenv.config();
 import puppeteer from 'puppeteer';
-import { executablePath as puppeteerExecutablePath } from 'puppeteer';
-import fs from 'fs';
-
 
 export async function scrapeProduct(url: string) {
   if (!url) return;
@@ -18,25 +15,17 @@ export async function scrapeProduct(url: string) {
   try {
 
 
-    const isRender = process.env.RENDER === 'true'; // or any env flag you prefer
-
-    const executablePath = isRender ? puppeteerExecutablePath() : undefined;
-
-    if (isRender && executablePath && !fs.existsSync(executablePath)) {
-      console.error('Chrome path not found:', executablePath);
-    }
+    const isRender = process.env.RENDER === 'true';
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath,
+      executablePath: isRender ? puppeteer.executablePath() : undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         `--proxy-server=http=${proxyHost}:${port}`,
       ],
     });
-
-    // ...existing code...
 
 
 
