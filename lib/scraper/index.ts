@@ -23,7 +23,7 @@ export async function scrapeProduct(url: string) {
 
     const browser = await puppeteer.launch({
       headless: 'new' as any,
-      executablePath: chromePath,
+      executablePath: '/opt/render/.cache/puppeteer/chrome/linux-138.0.7204.92/chrome-linux64/chrome',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
