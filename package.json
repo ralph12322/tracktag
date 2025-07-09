@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx puppeteer browsers install chrome"
+    "postinstall": "npx puppeteer browsers install chromium"
   },
  
 
@@ -30,10 +30,6 @@
     "react-hot-toast": "^2.5.2",
     "react-responsive-carousel": "^3.2.23"
   },
-
-  "puppeteer": {
-  "cacheDir": ".puppeteer-cache"
-},
 
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
