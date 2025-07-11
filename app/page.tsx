@@ -21,7 +21,6 @@ const Home = () => {
         });
 
         if (!res.ok) throw new Error('Unauthorized');
-        
       } catch (err) {
         setError('You must be logged in to view this page.');
         setTimeout(() => router.push('/auth/login'), 2000);
@@ -32,7 +31,7 @@ const Home = () => {
 
     fetchUser();
   }, [router]);
-
+  if (loading) return <h1 className="text-center text-gray-500 mt-10">Loading...</h1>;
   if (error) return <h1 className="text-center text-red-500 mt-10">{error}</h1>;
 
   return (

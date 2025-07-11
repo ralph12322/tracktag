@@ -83,7 +83,6 @@ export default function UserProfile() {
           <div className="mb-5">
             <span className="text-gray-600">Role:</span>
             <p className="text-gray-900 font-medium capitalize">
-              {user.role}
               {user.role.toLowerCase() === 'admin' && (
                 <span className="ml-2 text-xs bg-yellow-400 text-black px-2 py-0.5 rounded">
                   Admin

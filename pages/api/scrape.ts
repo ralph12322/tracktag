@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { scrapeProduct } from '@/lib/scraper';
 import { Product } from '@/lib/models/product';
 import { connectToDB } from '@/pages/api/start';
+import { getUserFromRequest } from '@/lib/utils/getUser';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -17,8 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await connectToDB();
 
+    // ✅ Get the user from the token
+    const user = await getUserFromRequest(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
     const product = await scrapeProduct(url);
-    console.log('Scraped product:', product);
 
     if (!product || !product.title) {
       return res.status(404).json({ error: 'Failed to scrape product or missing title' });
@@ -31,10 +35,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(existingProduct);
     }
 
-    const saveProduct = new Product(product);
+    // ✅ Inject user._id into product before saving
+    const saveProduct = new Product({
+      ...product,
+      user: user._id,
+    });
+
     await saveProduct.save();
 
-    console.log('💾 Product saved');
+    console.log('💾 Product saved with user');
     return res.status(200).json(saveProduct);
   } catch (error: any) {
     console.log('Error scraping product:', error);

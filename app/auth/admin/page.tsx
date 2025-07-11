@@ -1,50 +1,76 @@
 'use client';
 
-import { useEffect } from "react";
-import Chart from "chart.js/auto";
+import { useEffect, useState } from 'react';
+import {
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
+} from 'recharts';
+
+const COLORS = ['#f97316', '#3b82f6'];
+
+type Product = {
+  _id: string;
+  title: string;
+  platform: string;
+  currentPrice: number;
+  discount: string;
+  createdAt: string;
+  user?: {
+    _id: string;
+    username: string;
+  };
+};
+
 
 export default function AdminPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Pie Chart
-    const pieCtx = document.getElementById("platformPieChart") as HTMLCanvasElement | null;
-    const barCtx = document.getElementById("trackingBarChart") as HTMLCanvasElement | null;
-
-    let pieChart: Chart | undefined;
-    let barChart: Chart | undefined;
-
-    if (pieCtx) {
-      pieChart = new Chart(pieCtx, {
-        type: "pie",
-        data: {
-          labels: ["Lazada", "Amazon"],
-          datasets: [{
-            label: "Platforms",
-            data: [55, 45],
-            backgroundColor: ["#f97316", "#3b82f6"]
-          }]
-        }
-      });
-    }
-
-    if (barCtx) {
-      barChart = new Chart(barCtx, {
-        type: "bar",
-        data: {
-          labels: ["June", "July", "August"],
-          datasets: [{
-            label: "Active Tracking Logs",
-            data: [10, 20, 15],
-            backgroundColor: "#3b82f6"
-          }]
-        }
-      });
-    }
-
-    return () => {
-      pieChart?.destroy();
-      barChart?.destroy();
+    const fetchProducts = async () => {
+      const res = await fetch('/api/admin/products');
+      const data = await res.json();
+      setProducts(data);
+      setLoading(false);
     };
+    fetchProducts();
   }, []);
+
+  const totalTracked = products.length;
+  const activeTracking = products.filter(p => p.discount !== '').length;
+
+  const platformCount = products.reduce((acc: any, product: any) => {
+    acc[product.platform] = (acc[product.platform] || 0) + 1;
+    return acc;
+  }, {});
+  const pieData = Object.entries(platformCount).map(([name, value]) => ({ name, value }));
+
+  // Group by month for bar chart
+  // Group by month and platform
+  const monthPlatformMap: { [month: string]: { lazada: number; amazon: number } } = {};
+  products.forEach(p => {
+    const date = new Date(p.createdAt);
+    const month = date.toLocaleString('default', { month: 'short' });
+
+    if (!monthPlatformMap[month]) {
+      monthPlatformMap[month] = { lazada: 0, amazon: 0 };
+    }
+
+    if (p.platform.toLowerCase() === 'lazada') {
+      monthPlatformMap[month].lazada++;
+    } else if (p.platform.toLowerCase() === 'amazon') {
+      monthPlatformMap[month].amazon++;
+    }
+  });
+
+  const barData = Object.entries(monthPlatformMap).map(([month, value]) => ({
+    month,
+    ...value
+  }));
+
+
+  const topPlatform = (Object.entries(platformCount) as [string, number][])
+    .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -64,44 +90,86 @@ export default function AdminPage() {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Cards */}
+          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div className="bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Total Tracked Products</h3>
-              <p className="text-2xl font-bold">##</p>
+              <p className="text-2xl font-bold">{totalTracked}</p>
             </div>
             <div className="bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Active Tracking</h3>
-              <p className="text-2xl font-bold">#</p>
+              <p className="text-2xl font-bold">{activeTracking}</p>
             </div>
             <div className="bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Top Platform</h3>
-              <p className="text-2xl font-bold">Platform</p>
+              <p className="text-2xl font-bold">{topPlatform}</p>
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-4 shadow rounded">
-              <canvas id="platformPieChart" width="400" height="300" />
+              <h3 className="font-semibold mb-2">Platform Distribution</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
+
             <div className="bg-white p-4 shadow rounded">
-              <canvas id="trackingBarChart" width="400" height="300" />
+              <h3 className="font-semibold mb-2">Active Tracking Logs by Month</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="lazada" fill="#f97316" name="Lazada" />
+                  <Bar dataKey="amazon" fill="#3b82f6" name="Amazon" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Log Table */}
+          {/* Logs Table */}
           <div className="bg-white p-4 shadow rounded">
-            <h3 className="font-semibold mb-4">Recent Logs (sample)</h3>
+            <h3 className="font-semibold mb-4">Recent Logs</h3>
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray-100 text-left">
                   <th className="p-2">Date</th>
                   <th className="p-2">Product</th>
                   <th className="p-2">Platform</th>
-                  <th className="p-2">Status</th>
+                  <th className="p-2">Price</th>
+                  <th className="p-2">User</th>
                 </tr>
               </thead>
+              <tbody>
+                {products.slice(0, 5).map((p: any) => (
+                  <tr key={p._id} className="border-b">
+                    <td className="p-2">{new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td className="p-2 truncate max-w-[250px]">{p.title}</td>
+                    <td className="p-2">{p.platform}</td>
+                    <td className="p-2">{p.currentPrice}</td>
+                    <td className="p-2">{p.user?.username || 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </main>

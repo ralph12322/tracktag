@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -10,22 +9,7 @@ export default function LoginContent() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (!searchParams) return;
-    const reason = searchParams.get('reason');
-
-    if (reason === 'unauthorized') {
-      toast.error('You must be logged in first to access this page.');
-      router.replace('/auth/login');
-    }
-
-    if (reason === 'expired') {
-      toast.error('Your session has expired. Please log in again.');
-      router.replace('/auth/login');
-    }
-  }, [searchParams, router]);
+    
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

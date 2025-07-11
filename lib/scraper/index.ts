@@ -96,6 +96,7 @@ export async function scrapeProduct(url: string) {
       discount: '',
       imageUrl: '',
       url: url,
+      platform: '',
     };
 
     // Lazada
@@ -119,6 +120,7 @@ export async function scrapeProduct(url: string) {
         discount: lazadaPrices.discount,
         imageUrl: imageUrl,
         url: url,
+        platform: 'Lazada',
       };
     }
 
@@ -152,6 +154,7 @@ export async function scrapeProduct(url: string) {
         discount: discountRate,
         imageUrl: imageUrl,
         url: url,
+        platform: 'Amazon',
       };
     }
 

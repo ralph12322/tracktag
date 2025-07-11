@@ -9,6 +9,8 @@ type Product = {
   discount: string;
   imageUrl: string;
   url: string;
+  platform: string;
+  user: string;
 };
 
 interface Props {
