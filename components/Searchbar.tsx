@@ -10,6 +10,8 @@ type Product = {
   discount: string;
   imageUrl: string;
   url: string;
+  user: string;
+  platform: string;
 };
 
 const isValidAmazonProductURL = (url: string) => {
