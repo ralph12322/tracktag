@@ -8,12 +8,15 @@ const nextConfig = {
   },
   images: {
     domains: ['img.lazcdn.com', 'm.media-amazon.com',
+      'www.citypng.com',
+      'toppng.com',
       'images-na.ssl-images-amazon.com',
       'img.lazcdn.com',
       'laz-img-cdn.alicdn.com',
       'cf.shopee.ph',
       'deo.shopeemobile.com',
-      'ph-live.slatic.net',], // ✅ Lazada's CDN
+      'fabrikbrands.com',
+      'ph-live.slatic.net',]
   },
 };
 

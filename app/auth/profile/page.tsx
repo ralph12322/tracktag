@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 interface UserData {
   username: string;
   email: string;
-  role?: string;
+  role: string;
 }
 
 export default function UserProfile() {
@@ -28,6 +28,7 @@ export default function UserProfile() {
 
         if (!res.ok) throw new Error('Unauthorized');
         const data = await res.json();
+        console.log('User data:', data);
         setUser(data.user);
       } catch (err) {
         setError('You must be logged in to view this page.');
@@ -83,9 +84,9 @@ export default function UserProfile() {
           <div className="mb-5">
             <span className="text-gray-600">Role:</span>
             <p className="text-gray-900 font-medium capitalize">
-              {user.role.toLowerCase() === 'admin' && (
+              {user.role.toLowerCase() === 'user' ? 'USER' : (
                 <span className="ml-2 text-xs bg-yellow-400 text-black px-2 py-0.5 rounded">
-                  Admin
+                  ADMIN
                 </span>
               )}
             </p>

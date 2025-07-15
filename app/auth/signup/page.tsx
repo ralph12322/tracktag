@@ -1,13 +1,16 @@
-"use client"
+'use client'
 
 import { useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation'; // Or use `next/navigation` if using App Router
 
 export default function SignupPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const router = useRouter(); 
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +25,7 @@ export default function SignupPage() {
 
     if (res.ok) {
       toast.success('Signup successful!');
+      router.push('/auth/login');
     } else {
       toast.error(`${data.error}`);
     }

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -45,8 +46,6 @@ export default function AdminPage() {
   }, {});
   const pieData = Object.entries(platformCount).map(([name, value]) => ({ name, value }));
 
-  // Group by month for bar chart
-  // Group by month and platform
   const monthPlatformMap: { [month: string]: { lazada: number; amazon: number } } = {};
   products.forEach(p => {
     const date = new Date(p.createdAt);
@@ -73,18 +72,42 @@ export default function AdminPage() {
     .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <div className="min-h-screen bg-gray-100 p-6">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white p-6 border-r">
+        <aside className="w-64 bg-white p-6 border shadow-md rounded-lg mr-7">
           <h3 className="text-lg font-semibold mb-4">Dashboard</h3>
           <ul className="space-y-2">
-            <li><a className="text-blue-600 font-semibold" href="#">Home</a></li>
-            <li><a href="#">Product Tracking Logs</a></li>
-            <li><a href="#">Sentiment Analysis Logs</a></li>
-            <li><a href="#">Discount Alert Logs</a></li>
-            <li><a href="#">Authentication & Access</a></li>
-            <li><a href="#">User Feedback</a></li>
+            <li>
+              <Link href="/admin/userLogs" className="text-blue-600 hover:underline">
+                User Logs
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/productTrackingLogs" className="text-blue-600 hover:underline">
+                Product Tracking Logs
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/sentimentAnalysisLogs" className="text-blue-600 hover:underline">
+                Sentiment Analysis Logs
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/discountAlertLogs" className="text-blue-600 hover:underline">
+                Discount Alert Logs
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/authenticationAccess" className="text-blue-600 hover:underline">
+                Authentication & Access
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/userFeedback" className="text-blue-600 hover:underline">
+                User Feedback
+              </Link>
+            </li>
           </ul>
         </aside>
 
@@ -92,15 +115,15 @@ export default function AdminPage() {
         <main className="flex-1 p-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white p-4 shadow rounded">
+            <div className=" flex flex-col justify-center items-center bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Total Tracked Products</h3>
               <p className="text-2xl font-bold">{totalTracked}</p>
             </div>
-            <div className="bg-white p-4 shadow rounded">
+            <div className=" flex flex-col justify-center items-center bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Active Tracking</h3>
               <p className="text-2xl font-bold">{activeTracking}</p>
             </div>
-            <div className="bg-white p-4 shadow rounded">
+            <div className=" flex flex-col justify-center items-center bg-white p-4 shadow rounded">
               <h3 className="font-semibold mb-2">Top Platform</h3>
               <p className="text-2xl font-bold">{topPlatform}</p>
             </div>

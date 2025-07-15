@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import HeroCarousel from '@/components/HeroCarousel';
 import Searchbar from '@/components/Searchbar';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Home = () => {
   const router = useRouter();
@@ -36,7 +37,35 @@ const Home = () => {
 
   return (
     <>
-      <section className='px-6 md:px-20 py-24'>
+      <section>
+        <div className="fixed bottom-5 right-5 lg:right-48 z-10 flex flex-col md:flex-row items-center gap-6 lg:gap-20">
+          <div className="flex flex-col items-center">
+            <Link href="https://www.amazon.com" target="_blank" rel="noopener noreferrer">
+              <Image
+                src="https://fabrikbrands.com/wp-content/uploads/Amazon-Logo-1-1155x770.png"
+                alt="Amazon"
+                width={80}
+                height={80}
+                className="hover:scale-105 transition-transform object-contain"
+              />
+            </Link>
+          </div>
+          <div className="flex flex-col items-center">
+            <Link href="https://www.lazada.com.ph" target="_blank" rel="noopener noreferrer">
+              <Image
+                src="https://toppng.com/uploads/preview/1-1-117399190015vok5wuz1m.webp"
+                alt="Lazada"
+                width={80}
+                height={80}
+                className="hover:scale-105 transition-transform object-contain"
+              />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+
+      <section className='px-6 md:px-20 py-20'>
         <div className='flex max-xl:flex-col gap-16'>
           <div className='flex flex-col justify-center'>
             <p className='small-text'>
