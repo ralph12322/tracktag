@@ -7,14 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "patch-package"
+    "postinstall": "puppeteer browsers install chrome && patch-package"
   },
   "dependencies": {
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "chart.js": "^4.5.0",
     "cheerio": "^1.1.0",
-    "chrome-aws-lambda": "^10.1.0",
     "cookie": "^1.0.2",
     "daisyui": "^5.0.43",
     "dotenv": "^17.0.0",

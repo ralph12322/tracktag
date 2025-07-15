@@ -25,12 +25,13 @@ export default function LoginContent() {
 
       if (res.ok) {
         toast.success('Login successful!');
+        window.dispatchEvent(new Event('user-updated'));
         if (data.role === 'Admin') {
           router.push('/auth/admin');
         } else {
           router.push('/');
         }
-        setTimeout(() => window.location.reload(), 2000);
+        // setTimeout(() => window.location.reload(), 2000);
       } else {
         toast.error(`${data.error}`);
       }

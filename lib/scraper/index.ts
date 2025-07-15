@@ -18,8 +18,13 @@ export async function scrapeProduct(url: string) {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: [`--proxy-server=http=${proxyHost}:${port}`],
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        `--proxy-server=http=${proxyHost}:${port}`,
+      ],
     });
+
 
     const page = await browser.newPage();
 
@@ -73,7 +78,7 @@ export async function scrapeProduct(url: string) {
         Array.from(window.frames).forEach((frame: Window) => {
           try {
             injectToken(frame.document);
-          } catch (e) {}
+          } catch (e) { }
         });
       }, token);
 

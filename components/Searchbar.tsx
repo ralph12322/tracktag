@@ -2,7 +2,6 @@
 import React, { FormEvent, useState } from 'react';
 import DisplayProduct from './DisplayProduct';
 
-
 type Product = {
   title: string;
   currentPrice: string;
@@ -32,40 +31,40 @@ const Searchbar = () => {
 
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const isValidLink = isValidAmazonProductURL(searchPrompt);
-  if (!isValidLink) {
-    alert('Please enter a valid Amazon or Lazada URL.');
-    return;
-  }
-
-  try {
-    setIsLoading(true);
-
-    const response = await fetch('/api/scrape', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url: searchPrompt })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Unknown error occurred');
+    const isValidLink = isValidAmazonProductURL(searchPrompt);
+    if (!isValidLink) {
+      alert('Please enter a valid Amazon or Lazada URL.');
+      return;
     }
 
-    const result = await response.json();
-    setProduct(result)
-    console.log('Scraped product:', result);
-  } catch (error: any) {
-    console.error('Scrape error:', error.message);
-    alert('Failed to scrape product. Check console for details.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      setIsLoading(true);
+
+      const response = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: searchPrompt })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Unknown error occurred');
+      }
+
+      const result = await response.json();
+      setProduct(result)
+      console.log('Scraped product:', result);
+    } catch (error: any) {
+      console.error('Scrape error:', error.message);
+      alert('Failed to scrape product. Check console for details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
 
@@ -88,7 +87,31 @@ const Searchbar = () => {
           className="searchbar-btn"
           disabled={searchPrompt === ''}
         >
-          {isLoading ? '...' : 'Track!'}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+              <span className="text-sm opacity-80 animate-pulse">Tracking...</span>
+            </span>
+          ) : 'Track!'}
         </button>
       </form>
 

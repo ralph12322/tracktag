@@ -32,7 +32,16 @@ const Home = () => {
 
     fetchUser();
   }, [router]);
-  if (loading) return <h1 className="text-center text-gray-500 mt-10">Loading...</h1>;
+  if (loading) return (
+      <div className="flex items-center justify-center h-screen bg-[#F1F5F9]">
+        <div className="relative w-20 h-20">
+          <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
+          <div className="relative w-full h-full rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
+            Loading...
+          </div>
+        </div>
+      </div>
+    )
   if (error) return <h1 className="text-center text-red-500 mt-10">{error}</h1>;
 
   return (

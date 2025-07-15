@@ -48,18 +48,22 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (!res.ok) throw new Error('Unauthorized');
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
         const data = await res.json();
         setRole(data.user.role);
-      } catch {
-        setRole(null); 
+      } else {
+        setRole(null);
       }
     };
 
-    fetchUser();
+    fetchUser(); // on mount
+
+    // 🔁 Listen for user-updated event
+    window.addEventListener('user-updated', fetchUser);
+    return () => window.removeEventListener('user-updated', fetchUser);
   }, []);
+
 
 
   if (role === 'Admin') {
@@ -78,7 +82,7 @@ const Navbar = () => {
     );
   }
 
-  
+
   return (
     <header className="w-full bg-slate-600 rounded-10 sticky top-5 z-10">
       <nav className="nav">

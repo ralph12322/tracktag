@@ -49,6 +49,7 @@ export default function UserProfile() {
 
       if (res.ok) {
         toast.success('Logged out!');
+        window.dispatchEvent(new Event('user-updated'));
         router.push('/auth/login');
       } else {
         toast.error('Failed to log out.');
@@ -61,7 +62,16 @@ export default function UserProfile() {
     }
   };
 
-  if (loading) return <p className="text-center mt-10 text-gray-600">Loading profile...</p>;
+  if (loading) return (
+      <div className="flex items-center justify-center h-screen bg-[#F1F5F9]">
+        <div className="relative w-20 h-20">
+          <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
+          <div className="relative w-full h-full rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
+            Loading...
+          </div>
+        </div>
+      </div>
+    )
   if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
   if (!user) return null;
 
