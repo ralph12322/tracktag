@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tracktag
+    runtime: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run build && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BRIGHT_DATA_USERNAME
+        sync: false
+      - key: BRIGHT_DATA_PASSWORD
+        sync: false
