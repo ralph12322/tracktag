@@ -32,7 +32,7 @@ const DisplayProduct = ({ product }: Props) => {
         <Image
           src={product.imageUrl}
           alt={product.title}
-          width={500} 
+          width={500}
           height={500}
           className="w-64 h-64 object-contain rounded-xl"
         />
