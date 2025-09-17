@@ -7,7 +7,7 @@ const nextConfig = {
     }
   },
   images: {
-    domains: ['img.lazcdn.com', 'm.media-amazon.com',
+    domains: ['img.lazcdn.com', 'm.media-amazon.com', 'images.pexels.com', 'images.ctfassets.net', 'www.fishingstation.com', 'images.unsplash.com', 'www.fishingstation.com.au',
       'www.citypng.com',
       'toppng.com',
       'images-na.ssl-images-amazon.com',

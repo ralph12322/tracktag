@@ -39,6 +39,10 @@ export async function scrapeProduct(url: string) {
 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
+    const html = await page.content();
+    console.log(html.slice(0, 500)); // log first 500 chars
+
+
     // CAPTCHA Handling
     const frames = page.frames();
     let sitekey = '';
