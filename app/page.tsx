@@ -8,14 +8,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 type Product = {
-  title: string;        // scraper returns `title`
-  imageUrl: string;     // scraper returns `imageUrl`
+  name: string;
+  image: string;
   currentPrice: string;
   originalPrice: string;
-  discount?: string;
-  url: string;          // scraper returns `url`
+  discountRate?: string;
+  link: string;
   platform: string;
-};
+  rating?: string;
+  soldCount?: string;
+}
+
 
 const Home = () => {
   const router = useRouter();
@@ -59,6 +62,7 @@ const Home = () => {
         setLoadingProducts(false);
       }
     };
+    fetchProducts();
   }, []);
 
   if (loading)
@@ -147,77 +151,86 @@ const Home = () => {
 
       {/* Trending Section */}
       <section className="trending-section py-12">
-  <div className="max-w-7xl mx-auto px-6">
-    <h2 className="text-3xl font-extrabold text-gray-800 mb-10 text-center relative inline-block">
-      <span className="relative z-10 bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-pink-500 animate-pulse"></span>
-        Trending Apparel
-      </span>
-      <span className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-24 h-1 bg-gradient-to-r from-blue-500 to-pink-500 rounded-full"></span>
-    </h2>
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl font-extrabold text-gray-800 mb-10 text-center relative inline-block">
+            <span className="relative z-10 bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-pink-500 animate-pulse"></span>
+              Trending Apparel
+            </span>
+            <span className="absolute left-1/2 -translate-x-1/2 -bottom-2 w-24 h-1 bg-gradient-to-r from-blue-500 to-pink-500 rounded-full"></span>
+          </h2>
 
-    {loadingProducts ? (
-      <p className="text-center text-gray-500">Fetching trending items...</p>
-    ) : products.length === 0 ? (
-      <p className="text-center text-gray-500">No trending products found.</p>
-    ) : (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {products.map((product, index) => (
-          <a
-            key={index}
-            href={product.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col items-center text-center"
-          >
-            {/* Image */}
-            <img
-              src={product.imageUrl}
-              alt={product.title}
-              className="w-32 h-32 object-contain mb-4"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/images/placeholder-apparel.png";
-              }}
-            />
+          {loadingProducts ? (
+            <p className="text-center text-gray-500">Fetching trending items...</p>
+          ) : products.length === 0 ? (
+            <p className="text-center text-gray-500">No trending products found.</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {products.map((product, index) => (
+                <a
+                  key={index}
+                  href={product.link} // ✅ scraper uses `link`
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col items-center text-center"
+                >
+                  {/* Image */}
+                  <img
+                    src={product.image} // ✅ scraper uses `image`
+                    alt={product.name} // ✅ scraper uses `name`
+                    className="w-32 h-32 object-contain mb-4"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/placeholder-apparel.png";
+                    }}
+                  />
 
-            {/* Title */}
-            <h3 className="text-sm font-medium text-gray-800 line-clamp-2 h-10">
-              {product.title}
-            </h3>
+                  {/* Title */}
+                  <h3 className="text-sm font-medium text-gray-800 line-clamp-2 h-10">
+                    {product.name}
+                  </h3>
 
-            {/* Prices */}
-            <div className="mt-2 flex flex-col items-center">
-              {/* Current Price */}
-              <p className="text-green-600 font-bold text-lg">
-                {product.currentPrice || "See Price"}
-              </p>
+                  {/* Prices */}
+                  <div className="mt-2 flex flex-col items-center">
+                    {/* Current Price */}
+                    <p className="text-green-600 font-bold text-lg">
+                      {product.currentPrice || "See Price"}
+                    </p>
 
-              {/* Original Price (only if higher than current) */}
-              {product.originalPrice &&
-                product.originalPrice !== product.currentPrice && (
-                  <p className="text-gray-400 line-through text-sm">
-                    {product.originalPrice}
-                  </p>
-                )}
+                    {/* Original Price (only if higher than current) */}
+                    {product.originalPrice &&
+                      product.originalPrice !== product.currentPrice && (
+                        <p className="text-gray-400 line-through text-sm">
+                          {product.originalPrice}
+                        </p>
+                      )}
 
-              {/* Discount */}
-              {product.discount && (
-                <p className="text-pink-500 font-semibold text-sm">
-                  {product.discount}
-                </p>
-              )}
+                    {/* Discount */}
+                    {product.discountRate && ( // ✅ scraper uses `discountRate`
+                      <p className="text-pink-500 font-semibold text-sm">
+                        {product.discountRate}
+                      </p>
+                    )}
 
-              {/* Platform tag */}
-              <span className="mt-1 text-xs text-gray-500">
-                {product.platform}
-              </span>
+                    {/* Platform tag */}
+                    <span className="mt-1 text-xs text-gray-500">
+                      {product.platform}
+                    </span>
+                  </div>
+
+                  {/* Optional: Rating + Sold count */}
+                  {(product.rating || product.soldCount) && (
+                    <div className="mt-2 text-xs text-gray-500">
+                      {product.rating && <span>⭐ {product.rating}</span>}
+                      {product.soldCount && <span> • {product.soldCount} sold</span>}
+                    </div>
+                  )}
+                </a>
+              ))}
             </div>
-          </a>
-        ))}
-      </div>
-    )}
-  </div>
-</section>
+          )}
+        </div>
+      </section>
+
 
 
       <footer className="text-center text-gray-500 text-sm py-4 sticky bottom-0">

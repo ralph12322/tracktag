@@ -6,6 +6,64 @@ dotenv.config();
 
 puppeteer.use(StealthPlugin());
 
+// Random delay function with human-like variance
+function randomDelay(min = 1000, max = 3000) {
+  const delay = Math.random() * (max - min) + min;
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+// Progressive delay between attempts (gets longer each retry)
+function getBackoffDelay(attempt: number, baseDelay = 2000) {
+  const exponentialBackoff = Math.pow(2, attempt) * baseDelay;
+  const jitter = Math.random() * 1000; // Add randomness
+  return exponentialBackoff + jitter;
+}
+
+// Enhanced human behavior simulation
+async function enhancedHumanBehavior(page : any) {
+  // Initial pause to "read" the page
+  console.log('Simulating page reading...');
+  await randomDelay(2000, 4000);
+
+  // Random mouse movements (more realistic)
+  for (let i = 0; i < 3; i++) {
+    const x = Math.random() * 1200;
+    const y = Math.random() * 800;
+    await page.mouse.move(x, y, { steps: Math.floor(Math.random() * 10) + 5 });
+    await randomDelay(200, 800);
+  }
+
+  // Scroll behavior - more human-like
+  console.log('Simulating scrolling behavior...');
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      let scrolled = 0;
+      const maxScroll = Math.min(document.body.scrollHeight, 2000);
+      
+      const scroll = () => {
+        const distance = Math.random() * 200 + 100;
+        window.scrollBy(0, distance);
+        scrolled += distance;
+
+        if (scrolled >= maxScroll) {
+          // Scroll back up a bit (human-like)
+          window.scrollBy(0, -Math.random() * 300);
+          setTimeout(resolve, 500 + Math.random() * 1000);
+        } else {
+          // Random pause between scrolls
+          setTimeout(scroll, Math.random() * 800 + 300);
+        }
+      };
+      
+      scroll();
+    });
+  });
+
+  // Final pause before scraping
+  console.log('Final pause before scraping...');
+  await randomDelay(1500, 3000);
+}
+
 export async function scrapeProduct(url: string, retries = 3) {
   if (!url) return;
 
@@ -14,6 +72,17 @@ export async function scrapeProduct(url: string, retries = 3) {
     try {
       console.log(`Attempt ${attempt} to scrape ${url}`);
       
+      // INITIAL DELAY - Wait before even starting browser
+      if (attempt > 1) {
+        const retryDelay = getBackoffDelay(attempt);
+        console.log(`Waiting ${Math.round(retryDelay)}ms before retry ${attempt}...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        // First attempt - random initial delay
+        console.log('Initial startup delay...');
+        await randomDelay(1000, 3000);
+      }
+
       const username = String(process.env.BRIGHT_DATA_USERNAME);
       const password = String(process.env.BRIGHT_DATA_PASSWORD);
       const port = 22225;
@@ -33,6 +102,10 @@ export async function scrapeProduct(url: string, retries = 3) {
       });
 
       const page = await browser.newPage();
+
+      // DELAY after browser setup
+      console.log('Browser setup complete, waiting...');
+      await randomDelay(500, 1500);
 
       // Enhanced stealth settings
       await page.setExtraHTTPHeaders({
@@ -56,14 +129,20 @@ export async function scrapeProduct(url: string, retries = 3) {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
       );
 
-      // Random delay before navigation
-      const initialDelay = Math.random() * 2000 + 1000;
+      // DELAY before navigation - more realistic
+      console.log('Preparing to navigate...');
+      const initialDelay = Math.random() * 3000 + 2000; // 2-5 seconds
       await new Promise(resolve => setTimeout(resolve, initialDelay));
 
+      console.log('Navigating to page...');
       await page.goto(url, { 
         waitUntil: 'domcontentloaded', 
         timeout: 60000 
       });
+
+      // DELAY after page load - let everything settle
+      console.log('Page loaded, letting content settle...');
+      await randomDelay(3000, 5000);
 
       // Debug: check what page we landed on
       const pageTitle = await page.title();
@@ -84,12 +163,15 @@ export async function scrapeProduct(url: string, retries = 3) {
       if (isBlocked) {
         console.log('Blocking or CAPTCHA detected');
         await handleCaptcha(page, url);
+        // Extra delay after captcha handling
+        await randomDelay(5000, 8000);
       }
 
-      // Simulate human-like behavior
-      await simulateHumanBehavior(page);
+      // ENHANCED human behavior simulation
+      await enhancedHumanBehavior(page);
 
       // Wait for product content with multiple selectors
+      console.log('Waiting for product elements...');
       try {
         await Promise.race([
           page.waitForSelector('.pdp-product-title', { timeout: 8000 }),
@@ -101,6 +183,10 @@ export async function scrapeProduct(url: string, retries = 3) {
       } catch (error) {
         console.log('Waiting for product elements timed out, proceeding anyway');
       }
+
+      // FINAL DELAY before actual scraping
+      console.log('Starting data extraction...');
+      await randomDelay(1000, 2000);
 
       // More robust title extraction
       const title = await page.evaluate(() => {
@@ -148,9 +234,11 @@ export async function scrapeProduct(url: string, retries = 3) {
       // Lazada scraping with updated selectors
       if (url.includes('lazada.')) {
         console.log('Detected Lazada platform');
-        
+
         try {
           await Promise.race([
+            page.waitForSelector('.pdp-v2-product-price-content', { timeout: 5000 }),
+            page.waitForSelector('.pdp-v2-product-price-content-salePrice', { timeout: 5000 }),
             page.waitForSelector('.pdp-price_color_orange', { timeout: 5000 }),
             page.waitForSelector('.pdp-product-price', { timeout: 5000 }),
             page.waitForSelector('.pdp-v2-price-wrapper', { timeout: 5000 }),
@@ -161,8 +249,12 @@ export async function scrapeProduct(url: string, retries = 3) {
         }
 
         const lazadaData = await page.evaluate(() => {
-          // Multiple selector variations
+          // Multiple selector variations - mobile first, then desktop fallbacks
           const currentPriceSelectors = [
+            // Mobile version selectors (priority)
+            '.pdp-v2-product-price-content-salePrice-amount',
+            '.pdp-v2-product-price-content-salePrice',
+            // Desktop fallback selectors (your original ones)
             '.pdp-price_color_orange',
             '.pdp-product-price span',
             '[data-spm="price"]',
@@ -170,16 +262,23 @@ export async function scrapeProduct(url: string, retries = 3) {
             '.pdp-v2-price-wrapper',
             '.pdp-price'
           ];
-          
+
           const originalPriceSelectors = [
+            // Mobile version selectors (priority)
+            '.pdp-v2-product-price-content-originalPrice-amount',
+            '.pdp-v2-product-price-content-originalPrice',
+            // Desktop fallback selectors (your original ones)
             '.pdp-price_price_original',
             '.pdp-product-price__original',
             '.pdp-price_type_deleted',
             '.original-price',
             '.pdp-price .original'
           ];
-          
+
           const discountSelectors = [
+            // Mobile version selectors (priority)  
+            '.pdp-v2-product-price-content-originalPrice-discount',
+            // Desktop fallback selectors (your original ones)
             '.pdp-product-price__discount',
             '.pdp-discount-rate',
             '.discount-percentage',
@@ -203,7 +302,16 @@ export async function scrapeProduct(url: string, retries = 3) {
           for (const selector of currentPriceSelectors) {
             const element = document.querySelector(selector);
             if (element && element.textContent?.trim()) {
-              currentPrice = element.textContent.trim().replace(/\s+/g, ' ');
+              let price = element.textContent.trim().replace(/\s+/g, ' ');
+
+              // Special handling for mobile version where currency is separate
+              if (selector === '.pdp-v2-product-price-content-salePrice-amount') {
+                const currencyElement = document.querySelector('.pdp-v2-product-price-content-salePrice-sign');
+                const currency = currencyElement ? currencyElement.textContent.trim() : '₱';
+                currentPrice = currency + price;
+              } else {
+                currentPrice = price;
+              }
               break;
             }
           }
@@ -250,9 +358,9 @@ export async function scrapeProduct(url: string, retries = 3) {
 
         productData = {
           title,
-          currentPrice: lazadaData.currentPrice,
-          originalPrice: lazadaData.originalPrice,
-          discount: lazadaData.discount,
+          currentPrice: lazadaData.currentPrice || 'Price not available',
+          originalPrice: lazadaData.originalPrice || 'N/A',
+          discount: lazadaData.discount || '0%',
           imageUrl: lazadaData.imageUrl,
           url: url,
           platform: 'Lazada',
@@ -263,7 +371,7 @@ export async function scrapeProduct(url: string, retries = 3) {
       // Amazon
       if (url.includes('amazon.')) {
         console.log('Detected Amazon platform');
-        
+
         try {
           await Promise.race([
             page.waitForSelector('.a-price', { timeout: 5000 }),
@@ -279,14 +387,14 @@ export async function scrapeProduct(url: string, retries = 3) {
           const priceSymbol = document.querySelector('.a-price-symbol')?.textContent?.trim() || '$';
           const priceWhole = document.querySelector('.a-price-whole')?.textContent?.replace(/[^\d]/g, '') || '0';
           const priceFraction = document.querySelector('.a-price-fraction')?.textContent?.trim() || '00';
-          
+
           const originalPriceSelectors = [
             'span.a-size-small.aok-offscreen',
             '.a-price.a-text-price .a-offscreen',
             '[data-a-color="secondary"] .a-price .a-offscreen',
             '.basisPrice'
           ];
-          
+
           let rawTypicalPrice = '';
           for (const selector of originalPriceSelectors) {
             const element = document.querySelector(selector);
@@ -295,16 +403,16 @@ export async function scrapeProduct(url: string, retries = 3) {
               break;
             }
           }
-          
+
           const match = rawTypicalPrice.match(/\$[\d.,]+/);
           const typicalPrice = match ? match[0] : '';
-          
+
           const discountSelectors = [
             '.savingsPercentage',
             '.percent-off',
             '.a-badge-text'
           ];
-          
+
           let discount = '';
           for (const selector of discountSelectors) {
             const element = document.querySelector(selector);
@@ -319,7 +427,7 @@ export async function scrapeProduct(url: string, retries = 3) {
           if (img) {
             imageUrl = img.getAttribute('data-old-hires') || img.src || '';
           }
-          
+
           if (!imageUrl) {
             const metaImage = document.querySelector('meta[property="og:image"]');
             if (metaImage) {
@@ -337,88 +445,12 @@ export async function scrapeProduct(url: string, retries = 3) {
 
         productData = {
           title,
-          currentPrice: amazonData.currentPrice,
-          originalPrice: amazonData.normalPrice,
-          discount: amazonData.discountRate,
+          currentPrice: amazonData.currentPrice || 'Price not available',
+          originalPrice: amazonData.normalPrice || 'N/A',
+          discount: amazonData.discountRate || '0%',
           imageUrl: amazonData.imageUrl,
           url: url,
           platform: 'Amazon',
-          status: 'success'
-        };
-      }
-
-      // Shopee
-      if (url.includes('shopee.')) {
-        console.log('Detected Shopee platform');
-        
-        try {
-          await Promise.race([
-            page.waitForSelector('[data-testid="product-price"]', { timeout: 5000 }),
-            page.waitForSelector('.product-price', { timeout: 5000 }),
-            new Promise(resolve => setTimeout(resolve, 4000))
-          ]);
-        } catch (e) {
-          console.log('Shopee price elements not found immediately, continuing...');
-        }
-
-        const shopeeData = await page.evaluate(() => {
-          const currentPriceSelectors = [
-            '[data-testid="product-price"]',
-            '.product-price .current-price',
-            '._3e_UQT'
-          ];
-
-          const originalPriceSelectors = [
-            '.original-price',
-            '._1w9jLI'
-          ];
-
-          const discountSelectors = [
-            '.discount-label',
-            '._32hBOm'
-          ];
-
-          let currentPrice = '';
-          let originalPrice = '';
-          let discount = '';
-
-          for (const selector of currentPriceSelectors) {
-            const element = document.querySelector(selector);
-            if (element && element.textContent?.trim()) {
-              currentPrice = element.textContent.trim();
-              break;
-            }
-          }
-
-          for (const selector of originalPriceSelectors) {
-            const element = document.querySelector(selector);
-            if (element && element.textContent?.trim()) {
-              originalPrice = element.textContent.trim();
-              break;
-            }
-          }
-
-          for (const selector of discountSelectors) {
-            const element = document.querySelector(selector);
-            if (element && element.textContent?.trim()) {
-              discount = element.textContent.trim();
-              break;
-            }
-          }
-
-          const imageUrl = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
-
-          return { currentPrice, originalPrice, discount, imageUrl };
-        });
-
-        productData = {
-          title,
-          currentPrice: shopeeData.currentPrice,
-          originalPrice: shopeeData.originalPrice,
-          discount: shopeeData.discount,
-          imageUrl: shopeeData.imageUrl,
-          url: url,
-          platform: 'Shopee',
           status: 'success'
         };
       }
@@ -428,14 +460,14 @@ export async function scrapeProduct(url: string, retries = 3) {
 
     } catch (error: any) {
       console.error(`Attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt === retries) {
         // Return error data instead of throwing
         return {
           title: 'Error',
-          currentPrice: '',
-          originalPrice: '',
-          discount: '',
+          currentPrice: 'Price not available',
+          originalPrice: 'N/A',
+          discount: '0%',
           imageUrl: '',
           url: url,
           platform: 'Unknown',
@@ -443,15 +475,18 @@ export async function scrapeProduct(url: string, retries = 3) {
           error: error.message
         };
       }
-      
-      // Wait before retrying with exponential backoff
-      const backoffTime = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-      console.log(`Waiting ${backoffTime}ms before retry...`);
+
+      // Enhanced backoff with more randomness
+      const backoffTime = getBackoffDelay(attempt, 3000);
+      console.log(`Enhanced backoff: waiting ${Math.round(backoffTime)}ms before retry...`);
       await new Promise(resolve => setTimeout(resolve, backoffTime));
-      
+
     } finally {
       if (browser) {
+        console.log('Closing browser...');
         await browser.close();
+        // Small delay after closing browser
+        await randomDelay(500, 1000);
       }
     }
   }
@@ -459,7 +494,7 @@ export async function scrapeProduct(url: string, retries = 3) {
 
 async function handleCaptcha(page: any, url: string) {
   console.log('Handling CAPTCHA...');
-  
+
   const frames = page.frames();
   let sitekey = '';
   let recaptchaFrame = null;
@@ -505,40 +540,13 @@ async function handleCaptcha(page: any, url: string) {
 
       // Wait a bit and try to continue
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
     } catch (captchaError) {
       console.error('CAPTCHA solving failed:', captchaError);
     }
   } else {
     console.log('No reCAPTCHA found, but blocking detected');
   }
-}
-
-async function simulateHumanBehavior(page: any) {
-  // Random mouse movements
-  await page.mouse.move(Math.random() * 500, Math.random() * 500);
-  await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
-  
-  // Scroll randomly
-  await page.evaluate(async () => {
-    await new Promise<void>((resolve) => {
-      let totalHeight = 0;
-      const distance = 100 + Math.random() * 100;
-      const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
-        
-        if (totalHeight >= scrollHeight || totalHeight > 1500) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 150 + Math.random() * 150);
-    });
-  });
-  
-  // Random delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
 }
 
 async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string> {
