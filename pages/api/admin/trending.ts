@@ -290,10 +290,11 @@ export default async function handler(req: any, res: any) {
     
     const combined = [...amazonFiltered, ...lazadaFiltered];
     
-    console.log(`✅ Scraped ${combined.length} products with images`);
-    
-    res.status(200).json(combined);
-    
+    console.log(`✅ Scraped ${lazadaFiltered.length} products with images`);
+
+    res.status(200).json(lazadaProducts);
+    console.log(lazadaProducts);
+
   } catch (err) {
     console.error("❌ Trending scraper error:", err);
     res.status(500).json({ error: "Failed to fetch trending products" });

@@ -52,15 +52,13 @@ const Home = () => {
         const res = await fetch('/api/admin/trending', { cache: 'no-store' });
         const data = await res.json();
         setProducts(data);
-        console.log(data);
+        console.log(data.image);
       } catch (err) {
         console.error(err);
       } finally {
         setLoadingProducts(false);
       }
     };
-
-    fetchProducts();
   }, []);
 
   if (loading)
