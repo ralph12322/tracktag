@@ -7,7 +7,8 @@
     "build": "NODE_OPTIONS='--max-old-space-size=1024' next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "puppeteer browsers install chrome && patch-package"
+    "postinstall": "npm install puppeteer-extra-plugin-stealth && puppeteer browsers install chrome && patch-package"
+
   },
   "dependencies": {
     "axios": "^1.10.0",
