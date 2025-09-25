@@ -54,16 +54,26 @@ const Home = () => {
       try {
         const res = await fetch('/api/admin/trending', { cache: 'no-store' });
         const data = await res.json();
-        setProducts(data);
-        console.log(data.image);
+
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else if (Array.isArray(data.products)) {
+          setProducts(data.products);
+        } else {
+          console.error("Unexpected API response:", data);
+          setProducts([]);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch products:", err);
+        setProducts([]);
       } finally {
         setLoadingProducts(false);
       }
     };
+
     fetchProducts();
   }, []);
+
 
   if (loading)
     return (
