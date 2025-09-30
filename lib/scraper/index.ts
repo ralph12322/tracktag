@@ -35,7 +35,7 @@ const humanMouseMovement = async (page: Page): Promise<void> => {
 };
 
 const scrollRandomly = async (page: Page): Promise<void> => {
-  const scrolls = Math.floor(Math.random() * 3) + 1; // 1-3 scrolls
+  const scrolls = Math.floor(Math.random() * 3) + 1;
   for (let i = 0; i < scrolls; i++) {
     await page.evaluate(() => {
       window.scrollBy(0, Math.random() * 300 + 100);
@@ -44,39 +44,34 @@ const scrollRandomly = async (page: Page): Promise<void> => {
   }
 };
 
-// --- NEW: Enhanced scrolling function ---
+// --- Enhanced scrolling function ---
 const deepScroll = async (page: Page): Promise<void> => {
   console.log("🔄 Performing deep scroll to trigger lazy-loaded content...");
-  await page.evaluate(async () => {
-    await new Promise<void>(resolve => {
-      let totalHeight = 0;
-      const distance = 400;
-      const timer = setInterval(() => {
-        const scrollHeight = document.body.scrollHeight;
-        window.scrollBy(0, distance);
-        totalHeight += distance;
-        if (totalHeight >= scrollHeight) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 300);
+  try {
+    await page.evaluate(async () => {
+      await new Promise<void>(resolve => {
+        let totalHeight = 0;
+        const distance = 400;
+        const timer = setInterval(() => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 300);
+      });
     });
-  });
+  } catch (err) {
+    console.warn("⚠️ Deep scroll failed:", err);
+  }
 };
 
-// --- NEW: Safe extraction helper with retry ---
-async function safeExtract(page: Page, selector: string, fallback = ""): Promise<string> {
-  try {
-    return await page.$eval(selector, el => el.textContent?.trim() || "");
-  } catch {
-    return fallback;
-  }
-}
-
-// --- NEW: Session management ---
+// --- Session management ---
 let stickySession: number | null = null;
 let sessionUseCount = 0;
-const MAX_SESSION_USES = 5; // Reuse session up to 5 times before rotating
+const MAX_SESSION_USES = 5;
 
 function getSessionId(useSticky = true): number {
   if (useSticky && stickySession && sessionUseCount < MAX_SESSION_USES) {
@@ -85,7 +80,6 @@ function getSessionId(useSticky = true): number {
     return stickySession;
   }
   
-  // Generate new session
   const newSession = Math.floor(Math.random() * 1000000);
   if (useSticky) {
     stickySession = newSession;
@@ -98,23 +92,146 @@ function getSessionId(useSticky = true): number {
   return newSession;
 }
 
-// --- Fetch with retry for Cheerio ---
-async function fetchHTML(url: string, options: any, retries = 2): Promise<string> {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const res = await axios.get(url, options);
-      return res.data;
-    } catch (err) {
-      if (i === retries) throw err;
-      console.warn(`Fetch attempt ${i + 1} failed, retrying...`);
-      await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
-    }
+// --- IMPROVED: Extract product data with better error handling ---
+async function extractProductData(page: Page): Promise<any> {
+  // Wait for page to be fully loaded
+  await page.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 }).catch(() => {});
+  
+  // Wait specifically for price elements to appear
+  console.log("⏳ Waiting for price elements...");
+  try {
+    await page.waitForSelector(".pdp-v2-product-price-content-salePrice-amount", { timeout: 15000 });
+    console.log("✅ Price element found!");
+  } catch (err) {
+    console.warn("⚠️ Price selector timeout, trying alternative selectors...");
+    await page.waitForSelector('[class*="price"]', { timeout: 5000 }).catch(() => {});
   }
-  return "";
+  
+  // Try JSON extraction first
+  try {
+    const jsonData = await page.evaluate(() => {
+      try {
+        const script = Array.from(document.querySelectorAll('script'))
+          .find(s => s.textContent?.includes('__NEXT_DATA__'));
+        return script ? JSON.parse(script.textContent!) : null;
+      } catch {
+        return null;
+      }
+    });
+
+    if (jsonData) {
+      const product =
+        jsonData.props?.pageProps?.product ||
+        jsonData.props?.apolloState ||
+        jsonData?.props?.pageProps;
+
+      if (product?.name || product?.price) {
+        console.log("✅ Extracted from JSON!");
+        return {
+          title: product?.name || "",
+          currentPrice: product?.price?.displayPrice || "",
+          originalPrice: product?.price?.originalPrice || "",
+          discount: product?.price?.discount || "",
+          imageUrl: product?.images?.[0] || "",
+          source: "json"
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("⚠️ JSON extraction failed:", err);
+  }
+
+  // DOM extraction with better selectors
+  try {
+    const productData = await page.evaluate(() => {
+      // Helper function to safely get text
+      const getText = (selector: string): string => {
+        try {
+          const el = document.querySelector(selector);
+          const text = el?.textContent?.trim() || "";
+          if (text) console.log(`✓ Found text for ${selector}:`, text);
+          return text;
+        } catch {
+          return "";
+        }
+      };
+
+      // Helper to get attribute
+      const getAttr = (selector: string, attr: string): string => {
+        try {
+          const el = document.querySelector(selector);
+          return el?.getAttribute(attr) || "";
+        } catch {
+          return "";
+        }
+      };
+
+      // Title extraction
+      const title = 
+        getText("h1.pdp-mod-product-badge-title") ||
+        getText("h1[data-qa-locator='product-title']") ||
+        getText(".pdp-mod-product-badge-title") ||
+        getText("h1") ||
+        getAttr('meta[property="og:title"]', 'content') ||
+        document.title;
+
+      console.log('🔍 Attempting price extraction...');
+      
+      // Price extraction - direct targeting based on your HTML structure
+      const currentPriceSign = getText(".pdp-v2-product-price-content-salePrice-sign");
+      const currentPriceAmount = getText(".pdp-v2-product-price-content-salePrice-amount");
+      
+      console.log('Price sign:', currentPriceSign);
+      console.log('Price amount:', currentPriceAmount);
+      
+      const currentPrice = currentPriceSign && currentPriceAmount 
+        ? `${currentPriceSign}${currentPriceAmount}` 
+        : (getText(".pdp-v2-product-price-content-salePrice-amount") ||
+           getText("[data-qa-locator='product-price']") ||
+           getText(".pdp-price_color_orange") ||
+           getText('[class*="salePrice"]') ||
+           getText(".pdp-product-price"));
+
+      const originalPrice = 
+        getText(".pdp-v2-product-price-content-originalPrice-amount") ||
+        getText(".pdp-price_type_deleted") ||
+        getText('[class*="originalPrice"]') ||
+        getText("del");
+
+      const discount = 
+        getText(".pdp-v2-product-price-content-originalPrice-discount") ||
+        getText(".pdp-discount-rate") ||
+        getText('[class*="discount"]');
+
+      console.log('Final extracted prices:', { currentPrice, originalPrice, discount });
+
+      // Image extraction
+      const imgEl = document.querySelector(".gallery-preview-panel-v2__image") as HTMLImageElement ||
+                    document.querySelector(".pdp-mod-common-image") as HTMLImageElement ||
+                    document.querySelector('[data-qa-locator="product-image"]') as HTMLImageElement;
+      
+      let imageUrl = imgEl?.src || 
+                     imgEl?.getAttribute("data-src") || 
+                     getAttr('meta[property="og:image"]', 'content');
+
+      // Upgrade image quality
+      if (imageUrl && imageUrl.includes("_720x720q80")) {
+        imageUrl = imageUrl.replace("_720x720q80", "_2000x2000q80");
+      }
+
+      return { title, currentPrice, originalPrice, discount, imageUrl, source: "dom" };
+    });
+
+    console.log("✅ Extracted from DOM:", productData);
+    return productData;
+  } catch (err) {
+    console.error("❌ DOM extraction failed:", err);
+    throw new Error("Failed to extract product data from DOM");
+  }
 }
 
 // --- Enhanced Puppeteer scraping for Lazada ---
-async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetries = 2) {
+async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetries = 3) {
   let browser: Browser | undefined;
   let attempt = 0;
 
@@ -132,17 +249,32 @@ async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetri
           "--disable-setuid-sandbox",
           "--disable-blink-features=AutomationControlled",
           `--proxy-server=http=brd.superproxy.io:${port}`,
-          "--window-size=1366,768",
+          "--window-size=1920,1080",
           "--disable-dev-shm-usage",
           "--disable-gpu",
-          "--disable-blink-features=AutomationControlled"
         ],
       });
 
       const page = await browser.newPage();
 
-      page.on("console", (msg) => console.log("🔍 Page log:", msg.text()));
-      await page.setViewport({ width: 1366, height: 768 });
+      // Suppress console logs except errors
+      page.on("console", (msg) => {
+        if (msg.type() === 'error') {
+          console.log("🔍 Page error:", msg.text());
+        } else if (msg.text().includes('✓') || msg.text().includes('🔍') || msg.text().includes('Price')) {
+          // Show our debug logs
+          console.log("🔍 Page log:", msg.text());
+        }
+      });
+
+      // Intercept and allow blocked requests
+      await page.setRequestInterception(true);
+      page.on('request', (request) => {
+        // Allow all requests, don't block anything
+        request.continue();
+      });
+
+      await page.setViewport({ width: 1920, height: 1080 });
 
       await page.authenticate({
         username: `${username}-session-${session_id}`,
@@ -154,157 +286,98 @@ async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetri
         "Accept-Encoding": "gzip, deflate, br",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Upgrade-Insecure-Requests": "1",
-        "Cache-Control": "max-age=0",
       });
 
-      // Override navigator.webdriver
+      // Anti-detection
       await page.evaluateOnNewDocument(() => {
         Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
+        Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
       });
 
       console.log(`🌐 Loading Lazada product: ${url} (Attempt ${attempt + 1})`);
-      await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+      
+      // Navigate with better error handling
+      await page.goto(url, { 
+        waitUntil: "domcontentloaded", 
+        timeout: 45000 
+      });
 
-      await randomDelay(2000, 4000);
+      // Wait for initial load
+      await randomDelay(5000, 7000); // Increased from 3-5s
+      
+      // Human-like behavior
       await humanMouseMovement(page);
       await randomDelay(1000, 2000);
       await scrollRandomly(page);
-      
-      // NEW: Deep scroll to trigger lazy-loaded content
+      await randomDelay(2000, 3000); // Increased
+
+      // Wait for product content
+      console.log("⏳ Waiting for product data...");
+      await Promise.race([
+        page.waitForSelector("h1", { timeout: 20000 }),
+        page.waitForSelector('[class*="price"]', { timeout: 20000 }),
+        randomDelay(20000, 20000)
+      ]).catch(() => console.warn("⚠️ Selector timeout, proceeding anyway..."));
+
+      // Deep scroll
       await deepScroll(page);
-      await randomDelay(1500, 3000);
+      await randomDelay(3000, 4000); // Increased from 2-3s
 
-      // NEW: Wait for specific selectors with timeout
-      console.log("⏳ Waiting for product data to load...");
-      try {
-        await Promise.race([
-          page.waitForSelector(".pdp-v2-product-price-content-salePrice-amount", { timeout: 15000 }),
-          page.waitForSelector('[data-qa-locator="product-price"]', { timeout: 15000 }),
-          page.waitForSelector(".pdp-price", { timeout: 15000 }),
-          page.waitForSelector('[class*="price"]', { timeout: 15000 })
-        ]);
-        console.log("✅ Product selectors found!");
-      } catch (err) {
-        console.warn("⚠️ Price selectors not found within timeout, proceeding anyway...");
+      // Take a screenshot for debugging
+      console.log("📸 Taking screenshot for debugging...");
+      await page.screenshot({ path: 'lazada-debug.png', fullPage: false });
+
+      // Try to get raw HTML and parse with Cheerio as fallback
+      const htmlContent = await page.content();
+      console.log("🔍 Checking for price in raw HTML with Cheerio...");
+      
+      const $html = cheerio.load(htmlContent);
+      const htmlPrice = $html('.pdp-v2-product-price-content-salePrice-amount').text().trim();
+      const htmlOrigPrice = $html('.pdp-v2-product-price-content-originalPrice-amount').text().trim();
+      const htmlDiscount = $html('.pdp-v2-product-price-content-originalPrice-discount').text().trim();
+      
+      if (htmlPrice) {
+        console.log("✅ Found in HTML via Cheerio - Price:", htmlPrice, "Original:", htmlOrigPrice, "Discount:", htmlDiscount);
+      } else {
+        console.log("❌ No price found in HTML via Cheerio");
       }
 
-      // --- Try JSON extraction first ---
+      // Extract data with retries
       let productData: any = null;
-      let extractionSuccess = false;
+      let extractAttempt = 0;
+      const maxExtractRetries = 2;
 
-      try {
-        const jsonData = await page.evaluate(() => {
-          const script = Array.from(document.querySelectorAll('script'))
-            .find(s => s.textContent?.includes('__NEXT_DATA__'));
-          return script ? JSON.parse(script.textContent!) : null;
-        });
-
-        if (jsonData) {
-          const product =
-            jsonData.props?.pageProps?.product ||
-            jsonData.props?.apolloState ||
-            jsonData?.props?.pageProps;
-
-          if (product?.name || product?.price) {
-            productData = {
-              title: product?.name || document.title,
-              currentPrice: product?.price?.displayPrice || "",
-              originalPrice: product?.price?.originalPrice || "",
-              discount: product?.price?.discount || "",
-              imageUrl: product?.images?.[0] || "",
-            };
-            extractionSuccess = true;
-            console.log("✅ Lazada product extracted from JSON!");
-          }
-        }
-      } catch (err) {
-        console.warn("⚠️ JSON extraction failed, falling back to DOM scraping...");
-      }
-
-      // --- Enhanced DOM scraping with retry mechanism ---
-      if (!extractionSuccess) {
-        let retryCount = 0;
-        const maxDomRetries = 2;
-        
-        while (retryCount <= maxDomRetries && !extractionSuccess) {
-          try {
-            productData = await page.evaluate(() => {
-              const pageTitle = document.title;
-
-              const title =
-                document.querySelector("h1.pdp-mod-product-badge-title")?.textContent?.trim() ||
-                document.querySelector("h1[data-qa-locator='product-title']")?.textContent?.trim() ||
-                document.querySelector(".pdp-mod-product-badge-title")?.textContent?.trim() ||
-                document.querySelector("h1")?.textContent?.trim() ||
-                pageTitle;
-
-              const currentPriceEl =
-                document.querySelector(".pdp-v2-product-price-content-salePrice-amount") ||
-                document.querySelector("[data-qa-locator='product-price']") ||
-                document.querySelector(".pdp-price_color_orange") ||
-                document.querySelector('[class*="salePrice"]') ||
-                document.querySelector('[class*="price"][class*="current"]');
-              const currentPrice = currentPriceEl?.textContent?.trim() || "";
-
-              const originalPriceEl =
-                document.querySelector(".pdp-v2-product-price-content-originalPrice-amount") ||
-                document.querySelector(".pdp-price_type_deleted") ||
-                document.querySelector('[class*="originalPrice"]') ||
-                document.querySelector("del") ||
-                document.querySelector('[class*="price"][class*="original"]');
-              const originalPrice = originalPriceEl?.textContent?.trim() || "";
-
-              const discountEl =
-                document.querySelector(".pdp-v2-product-price-content-originalPrice-discount") ||
-                document.querySelector(".pdp-discount-rate") ||
-                document.querySelector('[class*="discount"]') ||
-                document.querySelector('[class*="save"]');
-              const discount = discountEl?.textContent?.trim() || "";
-
-              const imageEl =
-                document.querySelector(".gallery-preview-panel-v2__image") as HTMLImageElement ||
-                document.querySelector(".pdp-mod-common-image") as HTMLImageElement ||
-                document.querySelector('[data-qa-locator="product-image"]') as HTMLImageElement ||
-                document.querySelector(".pdp-product-image") as HTMLImageElement ||
-                document.querySelector('img[class*="gallery"]') as HTMLImageElement;
-
-              let imageUrl = imageEl?.src || imageEl?.getAttribute("data-src") || document.querySelector('meta[property="og:image"]')?.getAttribute("content") || "";
-
-              if (imageUrl && imageUrl.includes("_720x720q80")) {
-                imageUrl = imageUrl.replace("_720x720q80", "_2000x2000q80");
-              }
-
-              return { title, currentPrice, originalPrice, discount, imageUrl };
-            });
-
-            // Check if extraction was successful
-            if (productData.title && (productData.title !== document.title || productData.currentPrice)) {
-              extractionSuccess = true;
-              console.log(`✅ DOM extraction successful on attempt ${retryCount + 1}`);
-            } else {
-              retryCount++;
-              if (retryCount <= maxDomRetries) {
-                console.warn(`⚠️ DOM extraction incomplete, retrying... (${retryCount}/${maxDomRetries})`);
-                await randomDelay(2000, 3000);
-                await humanMouseMovement(page);
-                await scrollRandomly(page);
-              }
+      while (!productData && extractAttempt <= maxExtractRetries) {
+        try {
+          productData = await extractProductData(page);
+          
+          // Validate extraction - check if we have either title or price
+          if (!productData.title && !productData.currentPrice) {
+            if (extractAttempt < maxExtractRetries) {
+              console.warn(`⚠️ No data extracted, retrying... (${extractAttempt + 1}/${maxExtractRetries})`);
+              await randomDelay(2000, 3000);
+              await scrollRandomly(page);
+              productData = null;
             }
-          } catch (err) {
-            retryCount++;
-            if (retryCount > maxDomRetries) {
-              throw err;
-            }
-            console.warn(`⚠️ DOM extraction failed, retrying... (${retryCount}/${maxDomRetries})`);
-            await randomDelay(2000, 3000);
+          } else if (productData.title && !productData.currentPrice) {
+            console.warn("⚠️ Title found but price missing - proceeding anyway");
+            // Don't null out productData, we'll use what we have
+            break;
+          } else {
+            // We have both title and price
+            break;
           }
+        } catch (err) {
+          console.error(`❌ Extract attempt ${extractAttempt + 1} failed:`, err);
         }
+        extractAttempt++;
       }
 
       await browser.close();
 
-      // Check if we got meaningful data
-      if (!extractionSuccess || !productData.title || productData.title === "Error") {
+      // Final validation
+      if (!productData || !productData.title || productData.title === "Error") {
         throw new Error("Failed to extract meaningful product data");
       }
 
@@ -322,19 +395,21 @@ async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetri
       };
 
     } catch (err: any) {
-      if (browser) await browser.close();
-      attempt++;
+      if (browser) {
+        await browser.close().catch(() => {});
+      }
       
-      console.error(`❌ Puppeteer Lazada scraping failed (attempt ${attempt}):`, err.message);
+      attempt++;
+      console.error(`❌ Attempt ${attempt} failed:`, err.message);
       
       if (attempt <= maxRetries) {
-        console.log(`🔄 Retrying with new session... (${attempt}/${maxRetries})`);
+        console.log(`🔄 Retrying... (${attempt}/${maxRetries})`);
         // Force new session on retry
         stickySession = null;
         sessionUseCount = 0;
-        await randomDelay(3000, 5000);
+        await randomDelay(5000, 8000);
       } else {
-        console.error("❌ All retry attempts failed");
+        console.error("❌ All retry attempts exhausted");
         return {
           title: "Error",
           currentPrice: "Price not available",
@@ -352,7 +427,6 @@ async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetri
     }
   }
 
-  // This shouldn't be reached, but just in case
   return {
     title: "Error",
     currentPrice: "Price not available",
@@ -366,6 +440,21 @@ async function scrapeLazadaWithPuppeteer(url: string, useSticky = true, maxRetri
     status: "error",
     error: "Max retries exceeded",
   };
+}
+
+// --- Fetch with retry for Cheerio ---
+async function fetchHTML(url: string, options: any, retries = 2): Promise<string> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await axios.get(url, options);
+      return res.data;
+    } catch (err) {
+      if (i === retries) throw err;
+      console.warn(`Fetch attempt ${i + 1} failed, retrying...`);
+      await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+    }
+  }
+  return "";
 }
 
 // --- Main scraper function ---
@@ -453,11 +542,11 @@ export async function scrapeProduct(url: string) {
   return productData;
 }
 
-// --- NEW: Utility functions for session management ---
+// --- Utility functions ---
 export function resetSession() {
   stickySession = null;
   sessionUseCount = 0;
-  console.log("🔄 Session reset - next scrape will create a new session");
+  console.log("🔄 Session reset");
 }
 
 export function getSessionInfo() {
