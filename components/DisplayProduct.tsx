@@ -13,6 +13,12 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+type Review = {
+  user: string;
+  review: string;
+  stars: number;
+};
+
 type Product = {
   title: string;
   currentPrice: string;
@@ -22,23 +28,43 @@ type Product = {
   url: string;
   platform: string;
   user: string;
+  reviews: Review[];
+  analysis: string;
 };
 
 interface Props {
   product: Product | null;
-};
+}
 
 // --- Helpers ---
-const formatPrice = (price: string) => {
+const formatPrice = (price: string, platform: string) => {
   if (!price) return "N/A";
   const num = parseFloat(price.replace(/[^0-9.]/g, ""));
   if (isNaN(num)) return "N/A";
-  return `$${num.toFixed(2)}`;
+  const symbol = platform.toLowerCase() === "amazon" ? "$" : "₱";
+  return `${symbol}${num.toFixed(2)}`;
 };
 
 const toNumber = (price: string): number => {
   const num = parseFloat(price.replace(/[^0-9.]/g, ""));
   return isNaN(num) ? 0 : num;
+};
+
+const StarRating = ({ stars }: { stars: number }) => {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <svg
+          key={star}
+          className={`w-4 h-4 ${star <= stars ? 'text-yellow-400' : 'text-gray-300'}`}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
 };
 
 const DisplayProduct = ({ product }: Props) => {
@@ -58,25 +84,21 @@ const DisplayProduct = ({ product }: Props) => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Generate fake trend data around current/original price
+  // Generate fake trend data
   const pricing = months.reduce<Record<string, number>>((acc, month) => {
-    // Random discount between 5% and 50%
     const discountRate = Math.random() * 0.45 + 0.05;
     const discount = currentPrice * discountRate;
-
     let price = currentPrice - discount;
 
-    // Keep prices within a realistic bound
     if (basePrice > 0) {
-      const minBound = Math.min(basePrice, currentPrice) * 0.5; // at least 50% of base
-      const maxBound = Math.max(basePrice, currentPrice);       // cannot exceed original
+      const minBound = Math.min(basePrice, currentPrice) * 0.5;
+      const maxBound = Math.max(basePrice, currentPrice);
       price = Math.min(Math.max(price, minBound), maxBound);
     }
 
-    acc[month] = Math.round(price * 100) / 100; // keep 2 decimals
+    acc[month] = Math.round(price * 100) / 100;
     return acc;
   }, {});
-
 
   const data = Object.entries(pricing).map(([month, price]) => ({
     month,
@@ -87,100 +109,192 @@ const DisplayProduct = ({ product }: Props) => {
   const maxPrice = Math.max(...prices);
   const minPrice = Math.min(...prices);
 
+  const averageStars = product.reviews?.length
+    ? product.reviews.reduce((sum, r) => sum + r.stars, 0) / product.reviews.length
+    : 0;
+
+  const sentimentColor = product.analysis === 'good'
+    ? 'bg-green-50 text-green-700 border-green-200'
+    : 'bg-red-50 text-red-700 border-red-200';
+  const sentimentIcon = product.analysis === 'good' ? '😊' : '😟';
+
+  const currencySymbol = product.platform.toLowerCase() === "amazon" ? "$" : "₱";
+
   return (
-    <div className="mt-8 max-w-5xl mx-auto flex flex-col md:flex-row gap-8 rounded-2xl shadow-md p-6 border border-gray-100 bg-white">
-      {/* Product Image */}
-      <div className="flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-xl p-4">
-        <Image
-          src={product.imageUrl}
-          alt={product.title}
-          width={400}
-          height={400}
-          className="w-56 h-56 object-contain rounded-lg"
-        />
-      </div>
+    <div className="mt-8 max-w-7xl mx-auto">
+      {/* Main Product Card */}
+      <div className="rounded-2xl shadow-lg p-8 border border-gray-200 bg-white">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Product Image */}
+          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
+            <Image
+              src={product.imageUrl}
+              alt={product.title}
+              width={400}
+              height={400}
+              className="w-64 h-64 object-contain rounded-lg"
+            />
+          </div>
 
-      {/* Product Info + Chart */}
-      <div className="flex flex-col flex-grow gap-6">
-        {/* Product Details */}
-        <div>
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 leading-snug">
-            {product.title}
-          </h2>
-          <div className="mt-2">
-            <p className="text-2xl text-green-600 font-bold">
-              {formatPrice(product.currentPrice)}
-            </p>
+          {/* Product Info */}
+          <div className="flex flex-col flex-grow gap-6">
+            <div className="flex items-center gap-3">
+              <span className="inline-block text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                {product.platform}
+              </span>
+              {product.discount && (
+                <span className="inline-block text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                  {product.discount.replace('-', '')} OFF
+                </span>
+              )}
+            </div>
 
-            {product.originalPrice &&
-              product.originalPrice !== product.currentPrice && (
-                <p className="text-gray-400 line-through text-sm">
-                  {formatPrice(product.originalPrice)}
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+              {product.title}
+            </h2>
+
+            <div className="flex items-end gap-4">
+              <p className="text-4xl text-green-600 font-bold">
+                {formatPrice(product.currentPrice, product.platform)}
+              </p>
+              {product.originalPrice && product.originalPrice !== product.currentPrice && (
+                <p className="text-xl text-gray-400 line-through mb-1">
+                  {formatPrice(product.originalPrice, product.platform)}
                 </p>
               )}
+            </div>
 
-            {product.discount && (
-              <span className="inline-block mt-2 text-xs font-medium bg-green-100 text-green-700 px-2 py-0.5 rounded-lg">
-                {product.discount.replace('-', '')} OFF
-              </span>
+            {product.reviews && product.reviews.length > 0 && (
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <StarRating stars={Math.round(averageStars)} />
+                    <span className="text-lg font-semibold text-gray-700">
+                      {averageStars.toFixed(1)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Based on {product.reviews.length} review{product.reviews.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+
+                <div className={`ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2`}>
+                  <span className="text-xl">{sentimentIcon}</span>
+                  <span className="font-medium capitalize">{product.analysis} Sentiment</span>
+                </div>
+              </div>
             )}
+
+            <a
+              href={product.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              View on {product.platform}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="h-72 w-full border-t border-gray-100 pt-4">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">
-            Price Trend (Jan–Dec)
+        {/* Price Trend Chart */}
+        <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            📊 Price Trend (Jan–Dec)
           </h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 11, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(month) => month.slice(0, 3)}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                formatter={(value: number) => `$${value.toFixed(2)}`}
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.8rem',
-                  color: '#374151',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                }}
-              />
-              <Bar dataKey="price" radius={[6, 6, 0, 0]}>
-                {data.map((entry, index) => {
-                  let color = '#3b82f6'; // default blue
-                  if (entry.price === maxPrice) color = '#ef4444';
-                  if (entry.price === minPrice) color = '#22c55e';
-                  return <Cell key={`cell-${index}`} fill={color} />;
-                })}
-                <LabelList
-                  dataKey="price"
-                  position="top"
-                  formatter={(label) => {
-                    if (typeof label === 'number') {
-                      return `$${label.toFixed(2)}`;
-                    }
-                    return '';
-                  }}
-                  style={{ fontSize: 10, fill: '#374151' }}
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(month) => month.slice(0, 3)}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  formatter={(value: number) => `${currencySymbol}${value.toFixed(2)}`}
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.875rem',
+                    color: '#374151',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }}
+                />
+                <Bar dataKey="price" radius={[8, 8, 0, 0]}>
+                  {data.map((entry, index) => {
+                    let color = '#3b82f6';
+                    if (entry.price === maxPrice) color = '#ef4444';
+                    if (entry.price === minPrice) color = '#22c55e';
+                    return <Cell key={`cell-${index}`} fill={color} />;
+                  })}
+                  <LabelList
+                    dataKey="price"
+                    position="top"
+                    formatter={(label) => `${currencySymbol}${Number(label).toFixed(0)}`}
+                    style={{ fontSize: 11, fill: '#374151', fontWeight: 600 }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex justify-center gap-6 mt-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="text-gray-600">Lowest Price</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span className="text-gray-600">Highest Price</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-gray-600">Regular Price</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      {product.reviews && product.reviews.length > 0 && (
+        <div className="mt-6 rounded-2xl shadow-lg p-8 border border-gray-200 bg-white">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">
+            💬 Customer Reviews
+          </h3>
+          <div className="space-y-4">
+            {product.reviews.map((review, index) => (
+              <div
+                key={index}
+                className="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      {review.user.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">{review.user}</p>
+                      <StarRating stars={review.stars} />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
