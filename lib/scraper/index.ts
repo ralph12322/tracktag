@@ -96,7 +96,6 @@ async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string>
   throw new Error('Captcha solve timeout');
 }
 
-/** Auto login to Lazada and save cookies */
 /** Auto login to Lazada and save cookies (with 2Captcha support) */
 async function loginAndGetCookies(page: any) {
   console.log('🔐 Logging into Lazada...');
@@ -331,7 +330,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           console.log(`Found ${reviewContainers.length} review items`);
 
           reviewContainers.forEach((item, index) => {
-            if (index >= 5) return; // limit to 5 reviews
+            if (index >= 10) return; // limit to 5 reviews
 
             try {
               // Extract username from .reviewer span
@@ -446,20 +445,22 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
 
         // Extract prices
         const { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
-          const extractText = (s: string) => (document.querySelector(s) as HTMLElement)?.textContent?.trim() || '';
-          const fullText = document.body.innerText || '';
-          const priceRegex = /\$[\d,.]+/g;
-          const allPrices = fullText.match(priceRegex) || [];
+          const priceEl = document.querySelector('.a-price .a-offscreen');
+          const currentPrice = priceEl?.textContent?.trim() || '';
 
-          const priceWhole = (document.querySelector('.a-price-whole') as HTMLElement)?.textContent?.replace(/[^\d]/g, '') || '';
-          const priceFraction = (document.querySelector('.a-price-fraction') as HTMLElement)?.textContent?.trim() || '';
-          const currentPrice = priceWhole ? `$${priceWhole}.${priceFraction || '00'}` : allPrices[0] || '';
+          // Discount
+          const discountRate =
+            document.querySelector('.savingsPercentage')?.textContent?.trim() ||
+            (document.body.innerText.match(/-\d+%/)?.[0] || '');
 
-          const discountRate = extractText('.savingsPercentage') || (fullText.match(/-\d+%/)?.[0] || '');
-          const typicalPriceMatch = extractText('span.a-size-small.aok-offscreen').match(/\$[\d,.]+/)?.[0] || allPrices.find(p => p !== currentPrice) || '';
+          // Original/normal price
+          const normalPriceEl = document.querySelector('span.a-size-small.aok-offscreen');
+          const normalPrice = normalPriceEl?.textContent?.trim() || '';
 
-          return { currentPrice, discountRate, normalPrice: typicalPriceMatch };
+          return { currentPrice, discountRate, normalPrice };
         });
+
+
 
         // Extract image
         const imageUrl = await page.evaluate(() => {
@@ -542,7 +543,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           console.log(`Found ${reviewContainers.length} Amazon review items`);
 
           reviewContainers.forEach((item, index) => {
-            if (index >= 5) return; // limit to 5 reviews
+            if (index >= 10) return; // limit to 5 reviews
 
             try {
               // Extract username

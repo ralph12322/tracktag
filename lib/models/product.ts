@@ -9,8 +9,8 @@ const reviewSchema = new mongoose.Schema({
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   currentPrice: { type: String, required: true },
-  originalPrice: { type: String, required: true },
-  discount: { type: String, required: true },
+  originalPrice: { type: String, required: false },
+  discount: { type: String, required: false },
   imageUrl: { type: String },
   platform: { type: String },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

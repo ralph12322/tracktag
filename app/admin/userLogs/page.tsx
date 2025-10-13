@@ -54,11 +54,6 @@ export default function UserLogsPage() {
               </Link>
             </li>
             <li>
-              <Link href="/admin/sentimentAnalysisLogs" className="text-blue-600 hover:underline">
-                Sentiment Analysis Logs
-              </Link>
-            </li>
-            <li>
               <Link href="/admin/discountAlertLogs" className="text-blue-600 hover:underline">
                 Discount Alert Logs
               </Link>

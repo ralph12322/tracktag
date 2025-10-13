@@ -6,6 +6,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import Searchbar from '@/components/Searchbar';
 import Image from 'next/image';
 import Link from 'next/link';
+import  getTrendingProducts  from '@/lib/utils/trending';
 
 type Product = {
   name: string;
@@ -50,29 +51,20 @@ const Home = () => {
 
   // fetch products from Amazon scraper
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/api/admin/trending', { cache: 'no-store' });
-        const data = await res.json();
+  const cached = sessionStorage.getItem("trendingProducts");
+  if (cached) {
+    setProducts(JSON.parse(cached));
+    setLoadingProducts(false);
+    return;
+  }
 
-        if (Array.isArray(data)) {
-          setProducts(data);
-        } else if (Array.isArray(data.products)) {
-          setProducts(data.products);
-        } else {
-          console.error("Unexpected API response:", data);
-          setProducts([]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-        setProducts([]);
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
+  getTrendingProducts().then((data) => {
+    if (data.length > 0) setProducts(data);
+    setLoadingProducts(false);
+  });
+}, []);
 
-    fetchProducts();
-  }, []);
+
 
 
   if (loading)

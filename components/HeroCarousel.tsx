@@ -40,16 +40,8 @@ const HeroCarousel = () => {
           </div>
         ))}
       </Carousel>
-
-      {/* Decorative arrow (hidden on small screens) */}
-      <Image
-        src="/assets/icons/hand-drawn-arrow.svg"
-        alt="arrow"
-        width={175}
-        height={175}
-        className="hidden xl:block absolute top-65 -left-20 z-0"
-      />
     </div>
+
   );
 };
 

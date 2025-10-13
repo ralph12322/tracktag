@@ -13,6 +13,12 @@ import {
   CartesianGrid,
 } from 'recharts';
 
+import { useState } from 'react';
+
+// Inside DisplayProduct component, before return:
+
+
+
 type Review = {
   user: string;
   review: string;
@@ -68,6 +74,10 @@ const StarRating = ({ stars }: { stars: number }) => {
 };
 
 const DisplayProduct = ({ product }: Props) => {
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+
+
   if (!product) {
     return (
       <div className="mt-8 text-center text-gray-500 italic">
@@ -75,6 +85,10 @@ const DisplayProduct = ({ product }: Props) => {
       </div>
     );
   }
+
+  const reviewsToShow = showAllReviews
+    ? product.reviews
+    : product.reviews.slice(0, 3);
 
   const basePrice = toNumber(product.originalPrice);
   const currentPrice = toNumber(product.currentPrice) || basePrice;
@@ -273,7 +287,7 @@ const DisplayProduct = ({ product }: Props) => {
             💬 Customer Reviews
           </h3>
           <div className="space-y-4">
-            {product.reviews.map((review, index) => (
+            {reviewsToShow.map((review, index) => (
               <div
                 key={index}
                 className="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-shadow duration-200"
@@ -293,8 +307,20 @@ const DisplayProduct = ({ product }: Props) => {
               </div>
             ))}
           </div>
+
+          {product.reviews.length > 3 && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setShowAllReviews(!showAllReviews)}
+                className="text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200"
+              >
+                {showAllReviews ? "Show Less" : `Show More (${product.reviews.length - 3} more)`}
+              </button>
+            </div>
+          )}
         </div>
       )}
+
     </div>
   );
 };

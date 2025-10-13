@@ -135,9 +135,7 @@ export default function AdminPage() {
           <ul className="space-y-2 text-sm md:text-base">
             <li><Link href="/admin/userLogs" className="text-blue-600 hover:underline">User Logs</Link></li>
             <li><Link href="/admin/productTrackingLogs" className="text-blue-600 hover:underline">Product Tracking Logs</Link></li>
-            <li><Link href="/admin/sentimentAnalysisLogs" className="text-blue-600 hover:underline">Sentiment Analysis Logs</Link></li>
             <li><Link href="/admin/discountAlertLogs" className="text-blue-600 hover:underline">Discount Alert Logs</Link></li>
-            <li><Link href="/admin/authenticationAccess" className="text-blue-600 hover:underline">Authentication & Access</Link></li>
             <li><Link href="/admin/userFeedback" className="text-blue-600 hover:underline">User Feedback</Link></li>
           </ul>
         </aside>
