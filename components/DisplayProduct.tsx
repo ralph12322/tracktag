@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   BarChart,
@@ -13,12 +13,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import { useState } from 'react';
-
-// Inside DisplayProduct component, before return:
-
-
-
+// --- Types ---
 type Review = {
   user: string;
   review: string;
@@ -56,27 +51,23 @@ const toNumber = (price: string): number => {
   return isNaN(num) ? 0 : num;
 };
 
-const StarRating = ({ stars }: { stars: number }) => {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`w-4 h-4 ${star <= stars ? 'text-yellow-400' : 'text-gray-300'}`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  );
-};
+const StarRating = ({ stars }: { stars: number }) => (
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <svg
+        key={star}
+        className={`w-4 h-4 ${star <= stars ? 'text-yellow-400' : 'text-gray-300'}`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    ))}
+  </div>
+);
 
 const DisplayProduct = ({ product }: Props) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
-
-
 
   if (!product) {
     return (
@@ -86,19 +77,16 @@ const DisplayProduct = ({ product }: Props) => {
     );
   }
 
-  const reviewsToShow = showAllReviews
-    ? product.reviews
-    : product.reviews.slice(0, 3);
-
+  const reviewsToShow = showAllReviews ? product.reviews : product.reviews.slice(0, 3);
   const basePrice = toNumber(product.originalPrice);
   const currentPrice = toNumber(product.currentPrice) || basePrice;
 
+  // Generate mock data for chart
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
   ];
 
-  // Generate fake trend data
   const pricing = months.reduce<Record<string, number>>((acc, month) => {
     const discountRate = Math.random() * 0.45 + 0.05;
     const discount = currentPrice * discountRate;
@@ -114,15 +102,10 @@ const DisplayProduct = ({ product }: Props) => {
     return acc;
   }, {});
 
-  const data = Object.entries(pricing).map(([month, price]) => ({
-    month,
-    price,
-  }));
-
+  const data = Object.entries(pricing).map(([month, price]) => ({ month, price }));
   const prices = data.map((d) => d.price);
   const maxPrice = Math.max(...prices);
   const minPrice = Math.min(...prices);
-
   const averageStars = product.reviews?.length
     ? product.reviews.reduce((sum, r) => sum + r.stars, 0) / product.reviews.length
     : 0;
@@ -131,28 +114,27 @@ const DisplayProduct = ({ product }: Props) => {
     ? 'bg-green-50 text-green-700 border-green-200'
     : 'bg-red-50 text-red-700 border-red-200';
   const sentimentIcon = product.analysis === 'good' ? '😊' : '😟';
-
   const currencySymbol = product.platform.toLowerCase() === "amazon" ? "$" : "₱";
 
   return (
-    <div className="mt-8 max-w-7xl mx-auto">
-      {/* Main Product Card */}
-      <div className="rounded-2xl shadow-lg p-8 border border-gray-200 bg-white">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Product Image */}
+    <div className="mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Main Card */}
+      <div className="rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+          {/* Image */}
           <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
             <Image
               src={product.imageUrl}
               alt={product.title}
               width={400}
               height={400}
-              className="w-64 h-64 object-contain rounded-lg"
+              className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg"
             />
           </div>
 
-          {/* Product Info */}
-          <div className="flex flex-col flex-grow gap-6">
-            <div className="flex items-center gap-3">
+          {/* Info */}
+          <div className="flex flex-col flex-grow gap-5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="inline-block text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
                 {product.platform}
               </span>
@@ -163,24 +145,24 @@ const DisplayProduct = ({ product }: Props) => {
               )}
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
               {product.title}
             </h2>
 
-            <div className="flex items-end gap-4">
-              <p className="text-4xl text-green-600 font-bold">
+            <div className="flex flex-wrap items-end gap-4">
+              <p className="text-3xl sm:text-4xl text-green-600 font-bold">
                 {formatPrice(product.currentPrice, product.platform)}
               </p>
               {product.originalPrice && product.originalPrice !== product.currentPrice && (
-                <p className="text-xl text-gray-400 line-through mb-1">
+                <p className="text-lg sm:text-xl text-gray-400 line-through mb-1">
                   {formatPrice(product.originalPrice, product.platform)}
                 </p>
               )}
             </div>
 
             {product.reviews && product.reviews.length > 0 && (
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                <div className="flex flex-col">
+              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                <div className="flex flex-col items-center sm:items-start">
                   <div className="flex items-center gap-2">
                     <StarRating stars={Math.round(averageStars)} />
                     <span className="text-lg font-semibold text-gray-700">
@@ -192,7 +174,7 @@ const DisplayProduct = ({ product }: Props) => {
                   </p>
                 </div>
 
-                <div className={`ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2`}>
+                <div className={`mt-2 sm:mt-0 sm:ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2`}>
                   <span className="text-xl">{sentimentIcon}</span>
                   <span className="font-medium capitalize">{product.analysis} Sentiment</span>
                 </div>
@@ -203,7 +185,7 @@ const DisplayProduct = ({ product }: Props) => {
               href={product.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 shadow-md hover:shadow-lg"
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg w-full sm:w-auto"
             >
               View on {product.platform}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,92 +195,55 @@ const DisplayProduct = ({ product }: Props) => {
           </div>
         </div>
 
-        {/* Price Trend Chart */}
-        <div className="mt-8 p-6 bg-gray-50 rounded-xl">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        {/* Price Trend */}
+        <div className="mt-8 p-4 sm:p-6 bg-gray-50 rounded-xl">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
             📊 Price Trend (Jan–Dec)
           </h3>
-          <div className="h-80 w-full">
+          <div className="h-64 sm:h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(month) => month.slice(0, 3)}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  formatter={(value: number) => `${currencySymbol}${value.toFixed(2)}`}
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.75rem',
-                    fontSize: '0.875rem',
-                    color: '#374151',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  }}
-                />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(m) => m.slice(0, 3)} />
+                <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} />
+                <Tooltip formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`} contentStyle={{ background: 'white', borderRadius: '0.75rem', border: '1px solid #e5e7eb' }} />
                 <Bar dataKey="price" radius={[8, 8, 0, 0]}>
-                  {data.map((entry, index) => {
+                  {data.map((entry, i) => {
                     let color = '#3b82f6';
                     if (entry.price === maxPrice) color = '#ef4444';
                     if (entry.price === minPrice) color = '#22c55e';
-                    return <Cell key={`cell-${index}`} fill={color} />;
+                    return <Cell key={i} fill={color} />;
                   })}
-                  <LabelList
-                    dataKey="price"
-                    position="top"
-                    formatter={(label) => `${currencySymbol}${Number(label).toFixed(0)}`}
-                    style={{ fontSize: 11, fill: '#374151', fontWeight: 600 }}
-                  />
+                  <LabelList dataKey="price" position="top" formatter={(l) => `${currencySymbol}${Number(l).toFixed(0)}`} style={{ fontSize: 11, fill: '#374151', fontWeight: 600 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="flex justify-center gap-6 mt-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">Lowest Price</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-gray-600">Highest Price</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-600">Regular Price</span>
-            </div>
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500 rounded-full"></div><span>Lowest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div><span>Highest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div><span>Regular</span></div>
           </div>
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Reviews */}
       {product.reviews && product.reviews.length > 0 && (
-        <div className="mt-6 rounded-2xl shadow-lg p-8 border border-gray-200 bg-white">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
+        <div className="mt-6 rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
             💬 Customer Reviews
           </h3>
           <div className="space-y-4">
-            {reviewsToShow.map((review, index) => (
-              <div
-                key={index}
-                className="p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-start justify-between mb-3">
+            {reviewsToShow.map((review, i) => (
+              <div key={i} className="p-4 sm:p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                       {review.user.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">{review.user}</p>
+                      <p className="font-semibold text-gray-800 break-words">{review.user}</p>
                       <StarRating stars={review.stars} />
                     </div>
                   </div>
@@ -320,7 +265,6 @@ const DisplayProduct = ({ product }: Props) => {
           )}
         </div>
       )}
-
     </div>
   );
 };
