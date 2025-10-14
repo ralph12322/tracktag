@@ -2,6 +2,13 @@
 import React, { FormEvent, useState } from 'react';
 import DisplayProduct from './DisplayProduct';
 
+
+type Review = {
+  user: string;
+  review: string;
+  stars: number;
+};
+
 type Product = {
   title: string;
   currentPrice: string;
@@ -9,8 +16,14 @@ type Product = {
   discount: string;
   imageUrl: string;
   url: string;
-  user: string;
   platform: string;
+  user: string;
+  reviews: Review[];
+  analysis: string;
+};
+
+type SearchbarProps = {
+  onSearchComplete?: () => void;
 };
 
 const isValidAmazonProductURL = (url: string) => {
@@ -24,7 +37,7 @@ const isValidAmazonProductURL = (url: string) => {
   }
 };
 
-const Searchbar = () => {
+const Searchbar = ({ onSearchComplete }: SearchbarProps) => {
   const [searchPrompt, setSearchPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
@@ -32,7 +45,7 @@ const Searchbar = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    
     const isValidLink = isValidAmazonProductURL(searchPrompt);
     if (!isValidLink) {
       alert('Please enter a valid Amazon or Lazada URL.');
@@ -57,6 +70,7 @@ const Searchbar = () => {
 
       const result = await response.json();
       setProduct(result)
+      onSearchComplete?.(); // ✅ This is correct!
       console.log('Scraped product:', result);
     } catch (error: any) {
       console.error('Scrape error:', error.message);
@@ -106,7 +120,7 @@ const Searchbar = () => {
                 <path
                   className="opacity-75"
                   fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  d="M4 12a8 8 0 018-8v4a4 4 4 0 00-4 4H4z"
                 />
               </svg>
               <span className="text-sm opacity-80 animate-pulse">Tracking...</span>
@@ -120,4 +134,4 @@ const Searchbar = () => {
   );
 };
 
-export default Searchbar;
+export default Searchbar

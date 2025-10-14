@@ -330,7 +330,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           console.log(`Found ${reviewContainers.length} review items`);
 
           reviewContainers.forEach((item, index) => {
-            if (index >= 10) return; // limit to 5 reviews
+            if (index >= 10) return; // limit to 10 reviews
 
             try {
               // Extract username from .reviewer span
@@ -393,9 +393,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         });
 
         // Step 9: Simple sentiment analysis
-
         const analysis = analyzeSentiment(reviews.map((r: { review: any; }) => r.review));
-
 
         const productData: ProductData & { reviews: any[]; analysis: string } = {
           title,
@@ -408,7 +406,6 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           reviews,
           analysis,
         };
-
 
         await browser.close();
         console.log(productData);
@@ -423,14 +420,13 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           } catch { }
         }
       }
-
     }
 
     // --------------- Amazon Logic (Enhanced with Reviews) ---------------
     if (url.includes('amazon.')) {
       try {
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
-        await delay(3000);
+        await delay(5000); // Increased delay for dynamic content
 
         // Take screenshot for debugging
         try {
@@ -441,36 +437,172 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         fs.writeFileSync('amazon-debug.html', html, 'utf-8');
 
         // Extract product title
-        const title = await page.$eval('h1, #productTitle', (el: any) => el.textContent?.trim() || '');
+        const title = await page.evaluate(() => {
+          const selectors = ['#productTitle', 'h1', 'span#productTitle'];
+          for (const selector of selectors) {
+            const el = document.querySelector(selector);
+            if (el?.textContent?.trim()) {
+              return el.textContent.trim();
+            }
+          }
+          return '';
+        });
 
-        // Extract prices
-        const { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
-          const priceEl = document.querySelector('.a-price .a-offscreen');
-          const currentPrice = priceEl?.textContent?.trim() || '';
+        // Enhanced price extraction with multiple methods
+        let { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
+          let currentPrice = '';
+          
+          // Method 1: Try multiple selectors for current price
+          const priceSelectors = [
+            '.a-price .a-offscreen',
+            '#priceblock_ourprice',
+            '#priceblock_dealprice',
+            '.a-price-whole',
+            '#corePriceDisplay_desktop_feature_div .a-price .a-offscreen',
+            '.priceToPay .a-offscreen',
+            'span.a-price[data-a-size="xl"] .a-offscreen',
+            '.a-price.aok-align-center .a-offscreen',
+            '#corePrice_feature_div .a-price .a-offscreen',
+          ];
 
-          // Discount
-          const discountRate =
-            document.querySelector('.savingsPercentage')?.textContent?.trim() ||
-            (document.body.innerText.match(/-\d+%/)?.[0] || '');
+          for (const selector of priceSelectors) {
+            const el = document.querySelector(selector);
+            if (el?.textContent?.trim()) {
+              currentPrice = el.textContent.trim();
+              break;
+            }
+          }
 
-          // Original/normal price
-          const normalPriceEl = document.querySelector('span.a-size-small.aok-offscreen');
-          const normalPrice = normalPriceEl?.textContent?.trim() || '';
+          // Method 2: Try price from aria-label
+          if (!currentPrice) {
+            const priceSpans = Array.from(document.querySelectorAll('span.a-price'));
+            for (const span of priceSpans) {
+              const offscreen = span.querySelector('.a-offscreen');
+              if (offscreen?.textContent?.trim()) {
+                currentPrice = offscreen.textContent.trim();
+                break;
+              }
+            }
+          }
+
+          // Method 3: Regex pattern in body text
+          if (!currentPrice) {
+            const pricePattern = /\$\d+\.\d{2}/;
+            const bodyText = document.body.innerText;
+            const match = bodyText.match(pricePattern);
+            if (match) {
+              currentPrice = match[0];
+            }
+          }
+
+          // Discount extraction
+          let discountRate = '';
+          const discountSelectors = [
+            '.savingsPercentage',
+            '.a-badge-percentage',
+            'span.a-size-large.a-color-price.savingPriceOverride',
+            '.a-badge-label-text',
+          ];
+
+          for (const selector of discountSelectors) {
+            const el = document.querySelector(selector);
+            if (el?.textContent?.trim()) {
+              discountRate = el.textContent.trim();
+              break;
+            }
+          }
+
+          if (!discountRate) {
+            const discountMatch = document.body.innerText.match(/-\d+%/);
+            if (discountMatch) {
+              discountRate = discountMatch[0];
+            }
+          }
+
+          // Original/List price extraction
+          let normalPrice = '';
+          const normalPriceSelectors = [
+            'span.a-price.a-text-price .a-offscreen',
+            '.a-text-strike .a-offscreen',
+            '#priceblock_saleprice',
+            'span.a-size-small.aok-offscreen',
+            '.basisPrice .a-offscreen',
+          ];
+
+          for (const selector of normalPriceSelectors) {
+            const el = document.querySelector(selector);
+            if (el?.textContent?.trim()) {
+              normalPrice = el.textContent.trim();
+              break;
+            }
+          }
 
           return { currentPrice, discountRate, normalPrice };
         });
 
+        // Try structured data if price still empty
+        if (!currentPrice || currentPrice.trim() === '') {
+          console.log('⚠️ Attempting to extract price from structured data...');
+          
+          const structuredPrice = await page.evaluate(() => {
+            const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+            for (const script of scripts) {
+              try {
+                const data = JSON.parse(script.textContent || '');
+                if (data.offers?.price) {
+                  return `$${data.offers.price}`;
+                }
+                if (data.offers?.lowPrice) {
+                  return `$${data.offers.lowPrice}`;
+                }
+              } catch (e) {
+                // Continue to next script
+              }
+            }
+            return '';
+          });
 
+          if (structuredPrice) {
+            currentPrice = structuredPrice;
+            console.log('✅ Extracted price from structured data:', currentPrice);
+          }
+        }
+
+        // CRITICAL: Validate price exists
+        if (!currentPrice || currentPrice.trim() === '') {
+          console.error('❌ Failed to extract Amazon price after all attempts');
+          console.error('Title found:', title);
+          await browser.close();
+          throw new Error('Unable to extract product price from Amazon page. The page structure may have changed or the product is unavailable.');
+        }
+
+        console.log('✅ Amazon Prices extracted:', { currentPrice, discountRate, normalPrice });
 
         // Extract image
         const imageUrl = await page.evaluate(() => {
-          const img = document.querySelector('#landingImage') as HTMLImageElement;
-          return img?.getAttribute('data-old-hires') || img?.src || '';
+          const selectors = [
+            '#landingImage',
+            '#imgBlkFront',
+            '#main-image',
+            'img[data-old-hires]',
+          ];
+          
+          for (const selector of selectors) {
+            const img = document.querySelector(selector) as HTMLImageElement;
+            if (img) {
+              return img.getAttribute('data-old-hires') || 
+                     img.getAttribute('src') || 
+                     img.getAttribute('data-a-dynamic-image') || '';
+            }
+          }
+
+          // Fallback to meta tag
+          const meta = document.querySelector('meta[property="og:image"]');
+          return meta?.getAttribute('content') || '';
         });
 
         // Navigate to reviews section
         try {
-          // Click on "See all reviews" or reviews link
           const reviewsLinkClicked = await page.evaluate(() => {
             const reviewLinks = Array.from(document.querySelectorAll('a'));
             const reviewLink = reviewLinks.find(link =>
@@ -490,9 +622,8 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
               console.log("Navigation to reviews page...");
             });
           } else {
-            console.warn("⚠️ Reviews link not found, trying to scroll to reviews");
+            console.warn("⚠️ Reviews link not found, scrolling to reviews section");
 
-            // Scroll to reviews section on the same page
             await page.evaluate(() => {
               const reviewSection = document.querySelector('#reviewsMedley, #reviews, [data-hook="reviews-medley"]');
               if (reviewSection) {
@@ -526,11 +657,9 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         await delay(3000);
 
         // Extract reviews
-        // Extract reviews
         const reviews = await page.evaluate(() => {
           const results: { user: string; review: string; stars: number }[] = [];
 
-          // Amazon review selectors
           const reviewContainers = document.querySelectorAll(
             '[data-hook="review"], .review, .a-section.review'
           );
@@ -543,7 +672,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           console.log(`Found ${reviewContainers.length} Amazon review items`);
 
           reviewContainers.forEach((item, index) => {
-            if (index >= 10) return; // limit to 5 reviews
+            if (index >= 10) return; // limit to 10 reviews
 
             try {
               // Extract username
@@ -582,10 +711,10 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
                 }
               }
 
-              // Extract review text - THIS IS THE KEY FIX
+              // Extract review text
               let reviewText = '';
               const reviewSelectors = [
-                'span[data-hook="review-body"] span',  // Primary selector
+                'span[data-hook="review-body"] span',
                 '[data-hook="review-body"]',
                 '.review-text-content span',
                 '.review-text'
@@ -650,7 +779,12 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         };
 
         await browser.close();
-        console.log(productData);
+        console.log('✅ Successfully scraped Amazon product:', {
+          title: productData.title.substring(0, 50) + '...',
+          currentPrice: productData.currentPrice,
+          reviewCount: reviews.length
+        });
+        
         return productData;
 
       } catch (err: any) {
@@ -662,6 +796,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         throw new Error(`Amazon scrape failed: ${err.message || err}`);
       }
     }
+
     // --------------- Generic fallback ---------------
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
     const title = await page.title();

@@ -27,6 +27,7 @@ const Home = () => {
   const [error, setError] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [showHero, setShowHero] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -64,7 +65,9 @@ const Home = () => {
   });
 }, []);
 
-
+const handleSearchComplete = () => {
+  setShowHero(false);
+};
 
 
   if (loading)
@@ -145,9 +148,11 @@ const Home = () => {
               the best deals are never missed.”
             </p>
 
-            <Searchbar />
+            <Searchbar onSearchComplete={handleSearchComplete} />
+
+
           </div>
-          <HeroCarousel />
+          {showHero && <HeroCarousel />}
         </div>
       </section>
 
