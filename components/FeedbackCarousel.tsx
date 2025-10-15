@@ -72,7 +72,7 @@ const FeedbackCarousel = () => {
               transition={{ duration: 0.5 }}
               className="relative z-10"
             >
-              <p className="text-lg text-gray-700 italic text-center mb-6">
+              <p className="text-lg text-gray-700 italic text-center mb-6 break-words">
                 "{truncateMessage(currentFeedback.message)}"
               </p>
 
