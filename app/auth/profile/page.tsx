@@ -17,8 +17,9 @@ interface UserStats {
 }
 
 interface Product {
-  id: string;
-  name: string;
+  _id: string;
+  url: string;
+  title: string;
   currentPrice: string;
   originalPrice: string;
   isActive: boolean;
@@ -34,6 +35,7 @@ export default function UserProfile() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [visibleCount, setVisibleCount] = useState(10); // For "Load More" functionality
 
   // Fetch user & stats
   useEffect(() => {
@@ -78,6 +80,17 @@ export default function UserProfile() {
     };
     fetchProducts();
   }, []);
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 5); // show 5 more on each click
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(10); // reset to initial count
+  }
+
+  const visibleProducts = products.slice(0, visibleCount);
+
 
   const handleLogout = async () => {
     try {
@@ -131,24 +144,24 @@ export default function UserProfile() {
 
   const chartOption = stats
     ? {
-        tooltip: { trigger: 'item' },
-        legend: { bottom: 0 },
-        series: [
-          {
-            name: 'Tracking Stats',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
-            label: { show: true, position: 'inside', formatter: '{b}\n{c}' },
-            labelLine: { show: false },
-            data: [
-              { value: stats.activeTracks, name: 'Active Tracks' },
-              { value: stats.pastTracks, name: 'Past Tracks' },
-            ],
-          },
-        ],
-      }
+      tooltip: { trigger: 'item' },
+      legend: { bottom: 0 },
+      series: [
+        {
+          name: 'Tracking Stats',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+          label: { show: true, position: 'inside', formatter: '{b}\n{c}' },
+          labelLine: { show: false },
+          data: [
+            { value: stats.activeTracks, name: 'Active Tracks' },
+            { value: stats.pastTracks, name: 'Past Tracks' },
+          ],
+        },
+      ],
+    }
     : {};
 
   return (
@@ -166,11 +179,10 @@ export default function UserProfile() {
                 <p className="text-gray-500">{user.email}</p>
                 {user.role && (
                   <span
-                    className={`mt-2 inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                      user.role.toLowerCase() === 'user'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-yellow-300 text-yellow-900'
-                    }`}
+                    className={`mt-2 inline-block px-3 py-1 rounded-full text-sm font-semibold ${user.role.toLowerCase() === 'user'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-yellow-300 text-yellow-900'
+                      }`}
                   >
                     {user.role.toUpperCase()}
                   </span>
@@ -205,48 +217,90 @@ export default function UserProfile() {
               </button>
             </div>
 
-            {/* Product Table */}
-            {products.length > 0 && (
-              <div className="mt-6 bg-white p-6 rounded-2xl shadow-lg">
-                <h3 className="text-xl font-semibold text-gray-700 mb-4">Your Tracked Products</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Current Price
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Original Price
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {products.map((product) => (
-                        <tr key={product.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">{product.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">{product.currentPrice}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">{product.originalPrice}</td>
-                          <td
-                            className={`px-6 py-4 whitespace-nowrap font-medium ${
-                              product.isActive ? 'text-green-600' : 'text-red-600'
-                            }`}
-                          >
-                            {product.isActive ? 'Active' : 'Inactive'}
-                          </td>
+            <div className="mt-6 bg-white p-6 rounded-2xl shadow-lg">
+              <h3 className="text-xl font-semibold text-gray-700 mb-4">
+                Your Tracked Products
+              </h3>
+
+              {products.length === 0 ? (
+                <p className="text-gray-500">No products tracked yet.</p>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Current Price
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Original Price
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {visibleProducts.map((product) => (
+                          <tr key={product._id}>
+                            <td className="px-4 py-3 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
+                              <a
+                                href={product.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                                title={product.title}
+                              >
+                                {product.title}
+                              </a>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-gray-700">
+                              {product.currentPrice}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-gray-700">
+                              {product.originalPrice}
+                            </td>
+                            <td
+                              className={`px-4 py-3 whitespace-nowrap font-medium ${product.isActive ? 'text-green-600' : 'text-red-600'
+                                }`}
+                            >
+                              {product.isActive ? 'Active' : 'Inactive'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {(visibleCount < products.length || visibleCount > 10) && (
+                    <div className="mt-4 flex justify-center gap-4">
+                      {visibleCount < products.length && (
+                        <button
+                          onClick={handleShowMore}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          Show More
+                        </button>
+                      )}
+                      {visibleCount > 10 && (
+                        <button
+                          onClick={handleShowLess}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                          Show Less
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                </>
+              )}
+            </div>
+
           </div>
         </div>
 
