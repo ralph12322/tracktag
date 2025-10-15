@@ -7,6 +7,7 @@ import Searchbar from '@/components/Searchbar';
 import Image from 'next/image';
 import Link from 'next/link';
 import  getTrendingProducts  from '@/lib/utils/trending';
+import FeedbackCarousel from '@/components/FeedbackCarousel';
 
 type Product = {
   name: string;
@@ -52,22 +53,22 @@ const Home = () => {
 
   // fetch products from Amazon scraper
   useEffect(() => {
-  const cached = sessionStorage.getItem("trendingProducts");
-  if (cached) {
-    setProducts(JSON.parse(cached));
-    setLoadingProducts(false);
-    return;
-  }
+    const cached = sessionStorage.getItem("trendingProducts");
+    if (cached) {
+      setProducts(JSON.parse(cached));
+      setLoadingProducts(false);
+      return;
+    }
 
-  getTrendingProducts().then((data) => {
-    if (data.length > 0) setProducts(data);
-    setLoadingProducts(false);
-  });
-}, []);
+    getTrendingProducts().then((data) => {
+      if (data.length > 0) setProducts(data);
+      setLoadingProducts(false);
+    });
+  }, []);
 
-const handleSearchComplete = () => {
-  setShowHero(false);
-};
+  const handleSearchComplete = () => {
+    setShowHero(false);
+  };
 
 
   if (loading)
@@ -140,27 +141,26 @@ const handleSearchComplete = () => {
             </h1>
 
             <p className="mt-6">
-              “In a world where information is vast and constantly changing, the
+              "In a world where information is vast and constantly changing, the
               power no longer lies in having access to data, but in making sense
               of it. This system empowers online shoppers to go beyond the
               surface, transforming scattered prices and scattered reviews into
               meaningful insights, enabling smarter decisions, and ensuring that
-              the best deals are never missed.”
+              the best deals are never missed."
             </p>
 
             <Searchbar onSearchComplete={handleSearchComplete} />
-
-
           </div>
           {showHero && <HeroCarousel />}
         </div>
       </section>
 
       {/* Trending Section */}
+     
       <section className="trending-section py-12">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-extrabold text-gray-800 mb-10 text-center relative inline-block">
-            <span className="relative z-10 bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
+            <span className="relative bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-pink-500 animate-pulse"></span>
               Trending Apparel
             </span>
@@ -176,15 +176,15 @@ const handleSearchComplete = () => {
               {products.map((product, index) => (
                 <a
                   key={index}
-                  href={product.link} // ✅ scraper uses `link`
+                  href={product.link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col items-center text-center"
                 >
                   {/* Image */}
                   <img
-                    src={product.image} // ✅ scraper uses `image`
-                    alt={product.name} // ✅ scraper uses `name`
+                    src={product.image}
+                    alt={product.name}
                     className="w-32 h-32 object-contain mb-4"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/images/placeholder-apparel.png";
@@ -212,7 +212,7 @@ const handleSearchComplete = () => {
                       )}
 
                     {/* Discount */}
-                    {product.discountRate && ( // ✅ scraper uses `discountRate`
+                    {product.discountRate && (
                       <p className="text-pink-500 font-semibold text-sm">
                         {product.discountRate}
                       </p>
@@ -237,8 +237,8 @@ const handleSearchComplete = () => {
           )}
         </div>
       </section>
-
-
+         {/* Feedback Carousel at the very top */}
+      <FeedbackCarousel />
 
       <footer className="text-center text-gray-500 text-sm py-4 sticky bottom-0">
         &copy; 2025 TrackTag. All rights reserved. Owned by Mark Ponce & Santos,

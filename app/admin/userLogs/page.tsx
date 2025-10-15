@@ -31,7 +31,7 @@ export default function UserLogsPage() {
 
     fetchLogs();
   }, []);
-  
+
   if (loading) return (
     <div className="flex items-center justify-center h-screen bg-[#F1F5F9]">
       <div className="relative w-20 h-20">
@@ -48,21 +48,11 @@ export default function UserLogsPage() {
         <aside className="w-64 bg-white p-6 border shadow-md rounded-lg mr-12">
           <h3 className="text-lg font-semibold mb-4">Dashboard</h3>
           <ul className="space-y-2">
-            <li>
-              <Link href="/auth/admin" className="text-blue-600 hover:underline">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/discountAlertLogs" className="text-blue-600 hover:underline">
-                Discount Alert Logs
-              </Link>
-            </li>
-            <li>
-              <Link href="/admin/userFeedback" className="text-blue-600 hover:underline">
-                User Feedback
-              </Link>
-            </li>
+            <li><Link href="/auth/admin" className="text-blue-600 hover:underline">Admin Home</Link></li>
+            <li><Link href="/admin/userLogs" className="text-blue-600 hover:underline">User Logs</Link></li>
+            <li><Link href="/admin/productTrackingLogs" className="text-blue-600 hover:underline">Product Tracking Logs</Link></li>
+            <li><Link href="/admin/discountAlertLogs" className="text-blue-600 hover:underline">Discount Alert Logs</Link></li>
+            <li><Link href="/admin/userFeedback" className="text-blue-600 hover:underline">User Feedback</Link></li>
           </ul>
         </aside>
 

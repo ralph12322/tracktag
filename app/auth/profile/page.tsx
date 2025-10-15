@@ -11,6 +11,12 @@ interface UserData {
   role: string;
 }
 
+interface FeedbackData {
+  name: string;
+  email: string;
+  message: string;
+}
+
 interface UserStats {
   activeTracks: number;
   pastTracks: number;
@@ -34,7 +40,12 @@ export default function UserProfile() {
   const [error, setError] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState<FeedbackData>({
+    name: user?.username || '',
+    email: user?.email || '',
+    message: '',
+  });
+
   const [visibleCount, setVisibleCount] = useState(10); // For "Load More" functionality
 
   // Fetch user & stats
@@ -88,9 +99,7 @@ export default function UserProfile() {
   const handleShowLess = () => {
     setVisibleCount(10); // reset to initial count
   }
-
   const visibleProducts = products.slice(0, visibleCount);
-
 
   const handleLogout = async () => {
     try {
@@ -111,15 +120,22 @@ export default function UserProfile() {
   };
 
   const handleFeedbackSubmit = async () => {
-    if (!feedback.trim()) return toast.error('Feedback cannot be empty!');
+    if (!feedback || !feedback.message) {
+      toast.error('Please enter your feedback.');
+      return;
+    }
     try {
-      await fetch('/api/feedback', {
+      await fetch('/api/admin/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback }),
+        body: JSON.stringify({
+          name: user?.username,
+          email: user?.email,
+          message: feedback.message,
+        }),
       });
       toast.success('Thank you for your feedback!');
-      setFeedback('');
+      setFeedback({ name: user?.username || '', email: user?.email || '', message: '' });
       setShowFeedback(false);
     } catch (err) {
       console.error(err);
@@ -336,8 +352,8 @@ export default function UserProfile() {
               <textarea
                 className="w-full border border-gray-300 rounded-xl p-3 mb-4 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
                 placeholder="Your feedback..."
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
+                value={feedback?.message || ''}
+                onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
               />
               <div className="flex justify-end gap-4">
                 <button
