@@ -4,6 +4,7 @@ import { Product } from '@/lib/models/product';
 import { parseUserFromReq } from '@/lib/utils/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     await connectToDB();
 
