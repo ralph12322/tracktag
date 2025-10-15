@@ -83,8 +83,8 @@ const DisplayProduct = ({ product }: Props) => {
 
   // Generate mock data for chart
   const months = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
   const pricing = months.reduce<Record<string, number>>((acc, month) => {
@@ -229,11 +229,12 @@ const DisplayProduct = ({ product }: Props) => {
       </div>
 
       {/* Reviews */}
-      {product.reviews && product.reviews.length > 0 && (
-        <div className="mt-6 rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-            💬 Customer Reviews
-          </h3>
+      <div className="mt-6 rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
+          💬 Customer Reviews
+        </h3>
+
+        {product.reviews && product.reviews.length > 0 ? (
           <div className="space-y-4">
             {reviewsToShow.map((review, i) => (
               <div key={i} className="p-4 sm:p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all">
@@ -251,20 +252,23 @@ const DisplayProduct = ({ product }: Props) => {
                 <p className="text-gray-700 leading-relaxed">{review.review}</p>
               </div>
             ))}
-          </div>
 
-          {product.reviews.length > 3 && (
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => setShowAllReviews(!showAllReviews)}
-                className="text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200"
-              >
-                {showAllReviews ? "Show Less" : `Show More (${product.reviews.length - 3} more)`}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            {product.reviews.length > 3 && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setShowAllReviews(!showAllReviews)}
+                  className="text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200"
+                >
+                  {showAllReviews ? "Show Less" : `Show More (${product.reviews.length - 3} more)`}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-gray-500 italic text-center">No reviews available.</p>
+        )}
+      </div>
+
     </div>
   );
 };
