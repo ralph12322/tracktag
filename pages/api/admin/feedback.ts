@@ -20,17 +20,17 @@ export default async function handler(
     const { name, email, message } = req.body;
 
     // Validate input
-    const realUser = await User.findOne({ email });
+    const realUser = await User.findOne({ name, email });
     if (!realUser) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    if (!name || !realUser || !message) {
+    if (!name || !email || !message) {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
     try {
-      const feedback = await Feedback.create({ name, realUser, message });
+      const feedback = await Feedback.create({ name, email, message });
       return res.status(201).json({ success: true, data: feedback });
     } catch (error) {
       console.error(error);
