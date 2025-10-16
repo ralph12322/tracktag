@@ -52,77 +52,114 @@ const FeedbackCarousel = () => {
     <section
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      className="w-full"
     >
-      <div className="max-w-3xl mx-auto px-6">
-        <h2 className="text-2xl font-bold mb-6 relative z-10">
-            What Our Users Say:
+      <div className="max-w-4xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
+            What Our Users Say
           </h2>
-        <div className="relative bg-white rounded-2xl shadow-xl p-8 overflow-hidden">
-          {/* Decorative quotes */}
-          
-          <div className="absolute top-6 left-8 text-6xl text-blue-100 select-none">“</div>
+          <p className="text-slate-400 text-lg font-light">Real feedback from real users</p>
+        </div>
 
-          {/* Animated Feedback */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentFeedback._id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.5 }}
-              className="relative z-10"
+        {/* Feedback Card */}
+        <div className="relative group">
+          {/* Gradient Background Glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-600/20 via-cyan-600/20 to-teal-600/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          {/* Card Container */}
+          <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 overflow-hidden border border-teal-500/30 group-hover:border-teal-400/60 transition-colors duration-300">
+            
+            {/* Decorative Elements */}
+            <div className="absolute top-6 left-8 text-7xl text-teal-400/10 select-none font-serif">"</div>
+            <div className="absolute bottom-6 right-8 text-7xl text-cyan-400/10 select-none font-serif">"</div>
+
+            {/* Animated Feedback Content */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentFeedback._id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+                className="relative z-10"
+              >
+                {/* Message */}
+                <p className="text-lg md:text-xl text-slate-200 italic text-center mb-8 break-words font-light leading-relaxed">
+                  "{truncateMessage(currentFeedback.message)}"
+                </p>
+
+                {/* User Info */}
+                <div className="text-center space-y-2">
+                  <p className="font-semibold text-slate-100 text-lg">
+                    {currentFeedback.name}
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {new Date(currentFeedback.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </p>
+                </div>
+
+                {/* Star Rating */}
+                <div className="flex justify-center gap-1 mt-4">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="text-yellow-400">★</span>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={() =>
+                setCurrentIndex((prev) => (prev - 1 + feedbacks.length) % feedbacks.length)
+              }
+              className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 group/btn p-2 rounded-full hover:bg-teal-500/20 transition-all duration-300 z-20"
+              aria-label="Previous feedback"
             >
-              <p className="text-lg text-gray-700 italic text-center mb-6 break-words">
-                "{truncateMessage(currentFeedback.message)}"
-              </p>
+              <svg className="w-6 h-6 text-teal-400 group-hover/btn:text-teal-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
 
-              <div className="text-center">
-                <p className="font-semibold text-gray-900 text-base">
-                  {currentFeedback.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {new Date(currentFeedback.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+            <button
+              onClick={() => setCurrentIndex((prev) => (prev + 1) % feedbacks.length)}
+              className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 group/btn p-2 rounded-full hover:bg-teal-500/20 transition-all duration-300 z-20"
+              aria-label="Next feedback"
+            >
+              <svg className="w-6 h-6 text-teal-400 group-hover/btn:text-teal-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={() =>
-              setCurrentIndex((prev) => (prev - 1 + feedbacks.length) % feedbacks.length)
-            }
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all"
-            aria-label="Previous"
-          >
-            ←
-          </button>
-
-          <button
-            onClick={() => setCurrentIndex((prev) => (prev + 1) % feedbacks.length)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all"
-            aria-label="Next"
-          >
-            →
-          </button>
-
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-6">
+          {/* Indicator Dots */}
+          <div className="flex justify-center gap-3 mt-8">
             {feedbacks.map((_, index) => (
-              <button
+              <motion.button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`transition-all rounded-full ${
                   currentIndex === index
-                    ? 'bg-blue-600 w-6 h-2'
-                    : 'bg-gray-300 w-2 h-2 hover:bg-gray-400'
+                    ? 'bg-gradient-to-r from-teal-400 to-cyan-400 w-8 h-2'
+                    : 'bg-slate-700/50 w-2 h-2 hover:bg-slate-600'
                 }`}
+                whileHover={{ scale: 1.2 }}
+                aria-label={`Go to feedback ${index + 1}`}
               />
             ))}
+          </div>
+
+          {/* Counter */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-slate-400">
+              <span className="text-teal-400 font-semibold">{currentIndex + 1}</span> of{' '}
+              <span className="text-teal-400 font-semibold">{feedbacks.length}</span>
+            </p>
           </div>
         </div>
       </div>

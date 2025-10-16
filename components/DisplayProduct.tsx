@@ -56,7 +56,7 @@ const StarRating = ({ stars }: { stars: number }) => (
     {[1, 2, 3, 4, 5].map((star) => (
       <svg
         key={star}
-        className={`w-4 h-4 ${star <= stars ? 'text-yellow-400' : 'text-gray-300'}`}
+        className={`w-4 h-4 ${star <= stars ? 'text-yellow-400' : 'text-slate-600'}`}
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -71,7 +71,7 @@ const DisplayProduct = ({ product }: Props) => {
 
   if (!product) {
     return (
-      <div className="mt-8 text-center text-gray-500 italic">
+      <div className="mt-8 text-center text-slate-400 italic">
         No product selected. Search above to track an item.
       </div>
     );
@@ -111,72 +111,72 @@ const DisplayProduct = ({ product }: Props) => {
     : 0;
 
   const sentimentColor = product.analysis === 'good'
-    ? 'bg-green-50 text-green-700 border-green-200'
-    : 'bg-red-50 text-red-700 border-red-200';
+    ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
+    : 'bg-red-500/20 text-red-300 border-red-500/50';
   const sentimentIcon = product.analysis === 'good' ? '😊' : '😟';
   const currencySymbol = product.platform.toLowerCase() === "amazon" ? "$" : "₱";
 
   return (
-    <div className="mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="mt-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
       {/* Main Card */}
-      <div className="rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
+      <div className="rounded-3xl shadow-2xl p-6 sm:p-8 border border-teal-500/30 bg-slate-800/40 backdrop-blur-xl max-w-[90vw] mx-auto hover:border-teal-400/60 transition-colors duration-300">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Image */}
-          <div className="flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
+          <div className="flex-shrink-0 flex items-center justify-center bg-slate-700/40 rounded-2xl p-6 border border-teal-500/20">
             <Image
               src={product.imageUrl}
               alt={product.title}
               width={400}
               height={400}
-              className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg"
+              className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg brightness-110"
             />
           </div>
 
           {/* Info */}
           <div className="flex flex-col flex-grow gap-5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-block text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+              <span className="inline-block text-xs font-semibold bg-teal-500/20 text-teal-300 px-3 py-1 rounded-full border border-teal-500/50">
                 {product.platform}
               </span>
               {product.discount && (
-                <span className="inline-block text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                <span className="inline-block text-xs font-semibold bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/50">
                   {product.discount.replace('-', '')} OFF
                 </span>
               )}
             </div>
 
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-snug">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-100 leading-snug">
               {product.title}
             </h2>
 
             <div className="flex flex-wrap items-end gap-4">
-              <p className="text-3xl sm:text-4xl text-green-600 font-bold">
+              <p className="text-3xl sm:text-4xl bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent font-bold">
                 {formatPrice(product.currentPrice, product.platform)}
               </p>
               {product.originalPrice && product.originalPrice !== product.currentPrice && (
-                <p className="text-lg sm:text-xl text-gray-400 line-through mb-1">
+                <p className="text-lg sm:text-xl text-slate-500 line-through mb-1">
                   {formatPrice(product.originalPrice, product.platform)}
                 </p>
               )}
             </div>
 
             {product.reviews && product.reviews.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-700/40 rounded-xl border border-teal-500/20">
                 <div className="flex flex-col items-center sm:items-start">
                   <div className="flex items-center gap-2">
                     <StarRating stars={Math.round(averageStars)} />
-                    <span className="text-lg font-semibold text-gray-700">
+                    <span className="text-lg font-semibold text-slate-100">
                       {averageStars.toFixed(1)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-slate-400 mt-1">
                     Based on {product.reviews.length} review{product.reviews.length !== 1 ? 's' : ''}
                   </p>
                 </div>
 
-                <div className={`mt-2 sm:mt-0 sm:ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2`}>
+                <div className={`mt-2 sm:mt-0 sm:ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2 font-medium`}>
                   <span className="text-xl">{sentimentIcon}</span>
-                  <span className="font-medium capitalize">{product.analysis} Sentiment</span>
+                  <span className="capitalize">{product.analysis} Sentiment</span>
                 </div>
               </div>
             )}
@@ -185,7 +185,7 @@ const DisplayProduct = ({ product }: Props) => {
               href={product.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-teal-500/20 w-full sm:w-auto"
             >
               View on {product.platform}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,60 +196,63 @@ const DisplayProduct = ({ product }: Props) => {
         </div>
 
         {/* Price Trend */}
-        <div className="mt-8 p-4 sm:p-6 bg-gray-50 rounded-xl">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-            📊 Price Trend (Jan–Dec)
+        <div className="mt-8 p-4 sm:p-6 bg-slate-700/40 rounded-2xl border border-teal-500/20">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-100 mb-4">
+            Price Trend (Jan–Dec)
           </h3>
           <div className="h-64 sm:h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} tickFormatter={(m) => m.slice(0, 3)} />
-                <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <Tooltip formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`} contentStyle={{ background: 'white', borderRadius: '0.75rem', border: '1px solid #e5e7eb' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(15, 23, 42, 0.3)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(m) => m.slice(0, 3)} />
+                <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                <Tooltip 
+                  formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`} 
+                  contentStyle={{ background: '#1e293b', borderRadius: '0.75rem', border: '1px solid rgba(20, 184, 166, 0.3)', color: '#e2e8f0' }} 
+                />
                 <Bar dataKey="price" radius={[8, 8, 0, 0]}>
                   {data.map((entry, i) => {
-                    let color = '#3b82f6';
+                    let color = '#06b6d4';
                     if (entry.price === maxPrice) color = '#ef4444';
-                    if (entry.price === minPrice) color = '#22c55e';
+                    if (entry.price === minPrice) color = '#10b981';
                     return <Cell key={i} fill={color} />;
                   })}
-                  <LabelList dataKey="price" position="top" formatter={(l) => `${currencySymbol}${Number(l).toFixed(0)}`} style={{ fontSize: 11, fill: '#374151', fontWeight: 600 }} />
+                  <LabelList dataKey="price" position="top" formatter={(l) => `${currencySymbol}${Number(l).toFixed(0)}`} style={{ fontSize: 11, fill: '#cbd5e1', fontWeight: 600 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-green-500 rounded-full"></div><span>Lowest</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div><span>Highest</span></div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full"></div><span>Regular</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded-full"></div><span className="text-slate-400">Lowest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div><span className="text-slate-400">Highest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-cyan-500 rounded-full"></div><span className="text-slate-400">Regular</span></div>
           </div>
         </div>
       </div>
 
       {/* Reviews */}
-      <div className="mt-6 rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200 bg-white max-w-[90vw] mx-auto">
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-          💬 Customer Reviews
+      <div className="mt-6 rounded-3xl shadow-2xl p-6 sm:p-8 border border-teal-500/30 bg-slate-800/40 backdrop-blur-xl max-w-[90vw] mx-auto hover:border-teal-400/60 transition-colors duration-300">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-100 mb-6">
+          Customer Reviews
         </h3>
 
         {product.reviews && product.reviews.length > 0 ? (
           <div className="space-y-4">
             {reviewsToShow.map((review, i) => (
-              <div key={i} className="p-4 sm:p-5 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+              <div key={i} className="p-4 sm:p-5 bg-slate-700/40 rounded-xl border border-teal-500/20 hover:border-teal-400/40 hover:shadow-lg hover:shadow-teal-500/10 transition-all">
                 <div className="flex items-start justify-between mb-3 flex-wrap gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-semibold">
                       {review.user.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800 break-words">{review.user}</p>
+                      <p className="font-semibold text-slate-100 break-words">{review.user}</p>
                       <StarRating stars={review.stars} />
                     </div>
                   </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                <p className="text-slate-300 leading-relaxed">{review.review}</p>
               </div>
             ))}
 
@@ -257,7 +260,7 @@ const DisplayProduct = ({ product }: Props) => {
               <div className="flex justify-center mt-4">
                 <button
                   onClick={() => setShowAllReviews(!showAllReviews)}
-                  className="text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-200"
+                  className="text-teal-400 hover:text-teal-300 font-semibold transition-colors duration-200"
                 >
                   {showAllReviews ? "Show Less" : `Show More (${product.reviews.length - 3} more)`}
                 </button>
@@ -265,7 +268,7 @@ const DisplayProduct = ({ product }: Props) => {
             )}
           </div>
         ) : (
-          <p className="text-gray-500 italic text-center">No reviews available.</p>
+          <p className="text-slate-400 italic text-center">No reviews available.</p>
         )}
       </div>
 
