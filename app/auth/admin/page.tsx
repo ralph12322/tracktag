@@ -78,14 +78,14 @@ export default function AdminPage() {
 
   // ECharts Options with dark theme styling
   const pieOption = {
-    tooltip: { 
+    tooltip: {
       trigger: 'item',
       backgroundColor: '#1e293b',
       borderColor: 'rgba(20, 184, 166, 0.3)',
       textStyle: { color: '#e2e8f0' }
     },
-    legend: { 
-      orient: 'horizontal', 
+    legend: {
+      orient: 'horizontal',
       bottom: 0,
       textStyle: { color: '#cbd5e1', fontSize: 12 }
     },
@@ -97,8 +97,8 @@ export default function AdminPage() {
         data: pieData,
         animationDuration: 1200,
         animationEasing: 'cubicOut',
-        label: { 
-          show: true, 
+        label: {
+          show: true,
           formatter: '{b}: {c}',
           fontSize: 12,
           color: '#e2e8f0'
@@ -117,24 +117,24 @@ export default function AdminPage() {
   };
 
   const barOption = {
-    tooltip: { 
+    tooltip: {
       trigger: 'axis',
       backgroundColor: '#1e293b',
       borderColor: 'rgba(20, 184, 166, 0.3)',
       textStyle: { color: '#e2e8f0' }
     },
-    legend: { 
+    legend: {
       data: ['Lazada', 'Amazon'],
       textStyle: { color: '#cbd5e1', fontSize: 12 }
     },
     grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { 
-      type: 'category', 
+    xAxis: {
+      type: 'category',
       data: barData.map((d) => d.month),
       axisLine: { lineStyle: { color: '#475569' } },
       axisLabel: { color: '#94a3b8' }
     },
-    yAxis: { 
+    yAxis: {
       type: 'value',
       axisLine: { lineStyle: { color: '#475569' } },
       axisLabel: { color: '#94a3b8' },
@@ -145,7 +145,7 @@ export default function AdminPage() {
         name: 'Lazada',
         type: 'bar',
         data: barData.map((d) => d.lazada),
-        itemStyle: { 
+        itemStyle: {
           color: '#14b8a6',
           borderRadius: [6, 6, 0, 0]
         },
@@ -156,7 +156,7 @@ export default function AdminPage() {
         name: 'Amazon',
         type: 'bar',
         data: barData.map((d) => d.amazon),
-        itemStyle: { 
+        itemStyle: {
           color: '#06b6d4',
           borderRadius: [6, 6, 0, 0]
         },
@@ -177,13 +177,12 @@ export default function AdminPage() {
       </div>
 
       <div className="relative flex flex-col lg:flex-row gap-6 p-6">
-        {/*
-          *** ADJUSTMENT 1: Sidebar for Desktop Flow ***
-          Use the 'hidden lg:block' class to make this container only occupy space on large screens.
-        */}
-        <div className="hidden lg:block lg:sticky lg:top-6 lg:self-start w-full lg:w-auto">
-          <AdminSideBar />
-        </div>
+              {/* Sidebar */}
+              <div className="lg:sticky lg:top-6 lg:self-start w-full lg:w-auto">
+                <AdminSideBar />
+              </div>
+
+
 
         {/* Main Content */}
         <main className="flex-1 space-y-8">
@@ -208,23 +207,23 @@ export default function AdminPage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { 
-                title: 'Total Tracked Products', 
-                value: totalTracked, 
+              {
+                title: 'Total Tracked Products',
+                value: totalTracked,
                 gradient: 'from-teal-400 to-cyan-400',
                 icon: '📦',
                 accentColor: 'teal'
               },
-              { 
-                title: 'Active Tracking', 
-                value: activeTracking, 
+              {
+                title: 'Active Tracking',
+                value: activeTracking,
                 gradient: 'from-emerald-400 to-teal-400',
                 icon: '✅',
                 accentColor: 'emerald'
               },
-              { 
-                title: 'Top Platform', 
-                value: topPlatform, 
+              {
+                title: 'Top Platform',
+                value: topPlatform,
                 gradient: 'from-cyan-400 to-blue-400',
                 icon: '🏆',
                 accentColor: 'cyan'
@@ -327,11 +326,10 @@ export default function AdminPage() {
                           </div>
                         </td>
                         <td className="p-4">
-                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                            p.platform.toLowerCase() === 'lazada' 
-                              ? 'bg-teal-500/20 text-teal-300 border-teal-500/50' 
-                              : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                          }`}>
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${p.platform.toLowerCase() === 'lazada'
+                            ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
+                            : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                            }`}>
                             {p.platform}
                           </span>
                         </td>
@@ -363,18 +361,17 @@ export default function AdminPage() {
                     style={{ animationDelay: `${idx * 50}ms` }}
                   >
                     <div className="flex justify-between items-start gap-2 mb-3">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${
-                        p.platform.toLowerCase() === 'lazada' 
-                          ? 'bg-teal-500/20 text-teal-300 border-teal-500/50' 
-                          : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                      }`}>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${p.platform.toLowerCase() === 'lazada'
+                        ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
+                        : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                        }`}>
                         {p.platform}
                       </span>
                       <span className="text-xs text-slate-400 font-medium">
                         {new Date(p.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <div className="text-xs text-teal-300 font-semibold uppercase tracking-wide mb-1">Product</div>
@@ -401,13 +398,6 @@ export default function AdminPage() {
           </div>
         </main>
       </div>
-
-      {/*
-        *** ADJUSTMENT 2: Sidebar for Mobile Button/Fixed Menu ***
-        Render AdminSideBar again outside the main flex flow. It handles its own mobile visibility (fixed position)
-      */}
-      <AdminSideBar />
-
       <style jsx>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }

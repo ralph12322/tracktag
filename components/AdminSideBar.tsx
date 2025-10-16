@@ -31,7 +31,7 @@ export default function AdminSideBar() {
       {/* Mobile Hamburger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-9 left-6 z-50 bg-slate-800/80 backdrop-blur-xl p-3 rounded-xl border border-teal-500/30 hover:border-teal-400/60 shadow-md text-teal-300 transition-all duration-300"
+        className="lg:hidden fixed top-11 left-6 z-50 bg-slate-800/80 backdrop-blur-xl p-3 rounded-xl border border-teal-500/30 hover:border-teal-400/60 shadow-md text-teal-300 transition-all duration-300"
       >
         <Menu size={22} />
       </button>
