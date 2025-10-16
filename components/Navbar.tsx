@@ -67,7 +67,7 @@ const Navbar = () => {
 
   if (role === 'Admin') {
     return (
-      <header className="w-full bg-slate-600 rounded-10 sticky top-5 z-10">
+      <header className="w-full bg-slate-600 rounded-10 sticky top-5 z-50">
         <nav className="nav">
           <Link href="/" className="flex items-center gap-1">
             <Image src="/assets/icons/logo.png" width={27} height={27} alt="logo" />
