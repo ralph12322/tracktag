@@ -13,7 +13,6 @@
     "@sparticuz/chromium": "^141.0.0",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
-    "chart.js": "^4.5.0",
     "cheerio": "^1.1.0",
     "cookie": "^1.0.2",
     "daisyui": "^5.0.43",
