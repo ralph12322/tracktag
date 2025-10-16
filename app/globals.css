@@ -97,6 +97,29 @@
     }
   }
 
+  /* ==== Hide Scrollbar (while keeping scroll functionality) ==== */
+
+  /* For Chrome, Safari, Edge */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* For Firefox */
+  * {
+    scrollbar-width: none;
+  }
+
+  /* Ensure scrolling still works */
+  html,
+  body {
+    overflow: auto;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+
   .btn {
     @apply py-4 px-4 bg-secondary hover:bg-opacity-70 rounded-[30px] text-white text-lg font-semibold;
   }
