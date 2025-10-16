@@ -225,13 +225,6 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           await delay(8000);
         }
 
-        // Step 4: take a screenshot for debug
-        try {
-          await page.screenshot({ path: 'lazada-proxy-screenshot.png', fullPage: true });
-        } catch { }
-
-        const html = await page.content();
-        fs.writeFileSync('lazada-debug.html', html, 'utf-8');
 
         // Step 5: Wait for product content
         try {
@@ -427,14 +420,6 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
       try {
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
         await delay(5000); // Increased delay for dynamic content
-
-        // Take screenshot for debugging
-        try {
-          await page.screenshot({ path: 'amazon-screenshot.png', fullPage: true });
-        } catch { }
-
-        const html = await page.content();
-        fs.writeFileSync('amazon-debug.html', html, 'utf-8');
 
         // Extract product title
         const title = await page.evaluate(() => {
