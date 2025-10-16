@@ -114,7 +114,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
           <div className="relative bg-slate-800/60 backdrop-blur-xl p-3 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-orange-500/20 transform hover:scale-110 transition-all duration-300 border border-slate-700/50 hover:border-orange-500/50">
             <Image
-              src="https://fabrikbrands.com/wp-content/uploads/Amazon-Logo-1-1155x770.png"
+              src="https://1000logos.net/wp-content/uploads/2016/10/Amazon-logo-meaning.jpg"
               alt="Amazon"
               width={60}
               height={60}

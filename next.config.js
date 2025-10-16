@@ -15,7 +15,7 @@ const nextConfig = {
       'laz-img-cdn.alicdn.com',
       'cf.shopee.ph',
       'deo.shopeemobile.com',
-      'fabrikbrands.com',
+      '1000logos.net',
       'ph-live.slatic.net',]
   },
 };
