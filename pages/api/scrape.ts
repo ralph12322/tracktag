@@ -3,6 +3,7 @@ import { scrapeProduct } from '@/lib/scraper';
 import { Product } from '@/lib/models/product';
 import { connectToDB } from '@/pages/api/start';
 import { getUserFromRequest } from '@/lib/utils/getUser';
+import { TrackedProducts } from '@/lib/firebase/trackedProducts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -28,18 +29,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Failed to scrape product or missing title' });
     }
 
+    //mongo stored product update
     const existingProduct = await Product.findOne({ title: product.title });
 
-    if (existingProduct) {
+    //firestore tracked product update
+    const trackedProduct = await TrackedProducts.get(user._id.toString());
+
+
+    if (existingProduct && trackedProduct) {
       console.log('💾 Product already listed');
       const savedProduct = await Product.findOneAndUpdate(
         { title: product.title },
         { ...product, user: user._id },
         { upsert: true, new: true }
       );
-      return res.status(200).json(savedProduct);
+
+      console.log('💾 Product already listed, updating if needed')
+      await TrackedProducts.set(user._id.toString(), {
+        user: user._id,
+        title: product.title,
+        currentPrice: product.currentPrice,
+        email: user.email,
+        url: product.url,
+      })
+      return res.status(200).json({message: "💾 Product already listed", productInMdb: savedProduct, productInft: trackedProduct });
     }
 
+
+    console.log('➕ Adding new tracked product to Firestore')
+    await TrackedProducts.set(user._id.toString(), {
+      user: user._id,
+      title: product.title,
+      currentPrice: product.currentPrice,
+      email: user.email,
+      url: product.url,
+    });
+    console.log('💾 Product added to Firestore');
 
     // ✅ Inject user._id into product before saving
     const saveProduct = new Product({

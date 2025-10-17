@@ -10,20 +10,29 @@ type Data = {
   message?: string;
 };
 
+type UserData = {
+  title: string;
+  currentPrice: string;
+  email: string;
+  url: string;
+};
+
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
   try {
+    const userData = req.body;
     const docRef = db.collection("trackedProducts").doc("testUserDoc");
 
     // Test Write
     await docRef.set({
-      title: "Test Product V2",
-      currentPrice: "1234", 
-      url: "https://example.com/product",
-      imageUrl: "https://example.com/image.jpg",
+      title: userData.title,
+      currentPrice: userData.currentPrice,
+      email: userData.email,
+      url: userData.url,
       lastChecked: new Date().toISOString(),
     });
 
