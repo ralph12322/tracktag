@@ -32,8 +32,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (existingProduct) {
       console.log('💾 Product already listed');
-      return res.status(200).json(existingProduct);
+      const savedProduct = await Product.findOneAndUpdate(
+        { title: product.title },
+        { ...product, user: user._id },
+        { upsert: true, new: true }
+      );
+      return res.status(200).json(savedProduct);
     }
+
 
     // ✅ Inject user._id into product before saving
     const saveProduct = new Product({

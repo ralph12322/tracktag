@@ -150,10 +150,14 @@ async function loginAndGetCookies(page: any) {
   return cookies;
 }
 
-function analyzeSentiment(texts: string[]): 'good' | 'bad' {
+function analyzeSentiment(texts: string[]): 'good' | 'pwede na' | 'bad' {
   const totalScore = texts.reduce((sum, t) => sum + sentiment.analyze(t).score, 0);
-  return totalScore >= 0 ? 'good' : 'bad';
+  if (totalScore >= 3 && totalScore < 4) return 'pwede na';
+  if (totalScore >= 4) return 'good';
+  if (totalScore < -1) return 'bad';
+  return 'bad';
 }
+
 
 // ---------------------- Main scraper ----------------------
 export async function scrapeProduct(url: string): Promise<ProductData | null> {
@@ -385,8 +389,9 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           return results;
         });
 
-        // Step 9: Simple sentiment analysis
         const analysis = analyzeSentiment(reviews.map((r: { review: any; }) => r.review));
+
+
 
         const productData: ProductData & { reviews: any[]; analysis: string } = {
           title,
@@ -436,7 +441,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         // Enhanced price extraction with multiple methods
         let { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
           let currentPrice = '';
-          
+
           // Method 1: Try multiple selectors for current price
           const priceSelectors = [
             '.a-price .a-offscreen',
@@ -528,7 +533,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         // Try structured data if price still empty
         if (!currentPrice || currentPrice.trim() === '') {
           console.log('⚠️ Attempting to extract price from structured data...');
-          
+
           const structuredPrice = await page.evaluate(() => {
             const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
             for (const script of scripts) {
@@ -571,13 +576,13 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
             '#main-image',
             'img[data-old-hires]',
           ];
-          
+
           for (const selector of selectors) {
             const img = document.querySelector(selector) as HTMLImageElement;
             if (img) {
-              return img.getAttribute('data-old-hires') || 
-                     img.getAttribute('src') || 
-                     img.getAttribute('data-a-dynamic-image') || '';
+              return img.getAttribute('data-old-hires') ||
+                img.getAttribute('src') ||
+                img.getAttribute('data-a-dynamic-image') || '';
             }
           }
 
@@ -747,9 +752,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         }
 
         // Analyze sentiment
-        const analysis = reviews.length > 0
-          ? analyzeSentiment(reviews.map((r: { review: any; }) => r.review))
-          : 'good';
+        const analysis = analyzeSentiment(reviews.map((r: { review: any; }) => r.review));
 
         const productData: ProductData & { reviews: any[]; analysis: string } = {
           title,
@@ -769,7 +772,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           currentPrice: productData.currentPrice,
           reviewCount: reviews.length
         });
-        
+
         return productData;
 
       } catch (err: any) {

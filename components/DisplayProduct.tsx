@@ -110,10 +110,29 @@ const DisplayProduct = ({ product }: Props) => {
     ? product.reviews.reduce((sum, r) => sum + r.stars, 0) / product.reviews.length
     : 0;
 
-  const sentimentColor = product.analysis === 'good'
-    ? 'bg-teal-500/20 text-teal-300 border-teal-500/50'
-    : 'bg-red-500/20 text-red-300 border-red-500/50';
-  const sentimentIcon = product.analysis === 'good' ? '😊' : '😟';
+
+  const colorDecider = (analysis: string) => {
+    switch (analysis) {
+      case 'good':
+        return 'bg-teal-500/20 text-teal-300 border-teal-500/50';
+      case 'pwede na':
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50';
+      case 'bad':
+        return 'bg-red-500/20 text-red-300 border-red-500/50';
+    }
+  };
+  const sentimentColor = colorDecider(product.analysis);
+  const sentimentIconDecider = (analysis: string) => {
+    switch (analysis) {
+      case 'good':
+        return '😊';
+      case 'pwede na':
+        return '😐';
+      case 'bad':
+        return '😟';
+    }
+  };
+  const sentimentIcon = sentimentIconDecider(product.analysis);
   const currencySymbol = product.platform.toLowerCase() === "amazon" ? "$" : "₱";
 
   return (
@@ -176,7 +195,7 @@ const DisplayProduct = ({ product }: Props) => {
 
                 <div className={`mt-2 sm:mt-0 sm:ml-auto px-4 py-2 rounded-lg border ${sentimentColor} flex items-center gap-2 font-medium`}>
                   <span className="text-xl">{sentimentIcon}</span>
-                  <span className="capitalize">{product.analysis} Sentiment</span>
+                  <span className="capitalize">{product.analysis} po!</span>
                 </div>
               </div>
             )}
@@ -206,9 +225,9 @@ const DisplayProduct = ({ product }: Props) => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(15, 23, 42, 0.3)" />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(m) => m.slice(0, 3)} />
                 <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                <Tooltip 
-                  formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`} 
-                  contentStyle={{ background: '#1e293b', borderRadius: '0.75rem', border: '1px solid rgba(20, 184, 166, 0.3)', color: '#e2e8f0' }} 
+                <Tooltip
+                  formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`}
+                  contentStyle={{ background: '#1e293b', borderRadius: '0.75rem', border: '1px solid rgba(20, 184, 166, 0.3)', color: '#e2e8f0' }}
                 />
                 <Bar dataKey="price" radius={[8, 8, 0, 0]}>
                   {data.map((entry, i) => {
