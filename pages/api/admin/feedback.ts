@@ -20,10 +20,12 @@ export default async function handler(
     const { name, email, message } = req.body;
 
     // Validate input
-    const realUser = await User.findOne({ name, email });
-    if (!realUser) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
-    }
+    const realUser = await User.findOne({
+      username: name.trim(),
+      email: email.trim().toLowerCase(),
+    });
+    if (!realUser) return res.status(404).json({ success: false, message: 'User not found.' });
+
 
     if (!name || !email || !message) {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
@@ -36,7 +38,7 @@ export default async function handler(
       console.error(error);
       return res.status(500).json({ success: false, message: 'Server error' });
     }
-  } 
+  }
   else if (req.method === 'GET') {
     try {
       const feedbacks = await Feedback.find();
@@ -46,7 +48,7 @@ export default async function handler(
       console.error(error);
       return res.status(500).json({ success: false, message: 'Server error' });
     }
-  } 
+  }
   else {
     res.setHeader('Allow', ['GET', 'POST']);
     return res.status(405).json({ success: false, message: `Method ${req.method} Not Allowed` });
