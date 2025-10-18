@@ -53,11 +53,6 @@ export default function AdminSideBar() {
           <div>
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-              <div className="flex gap-2">
-                <span className="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></span>
-                <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse animation-delay-150"></span>
-                <span className="w-3 h-3 rounded-full bg-slate-400 animate-pulse animation-delay-300"></span>
-              </div>
 
               {/* Close button (Mobile only) */}
               <button

@@ -79,11 +79,7 @@ export default function UserFeedbackPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
             <div className="relative bg-slate-800/40 backdrop-blur-xl rounded-3xl p-8 border border-teal-500/30 shadow-2xl">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex gap-2">
-                  <span className="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></span>
-                  <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse animation-delay-150"></span>
-                  <span className="w-3 h-3 rounded-full bg-slate-400 animate-pulse animation-delay-300"></span>
-                </div>
+
               </div>
               <h1 className="text-4xl lg:text-5xl font-black mb-2 bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
                 User Feedback
