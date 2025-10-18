@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../start';
-import { Product } from '@/lib/models/product'; // adjust path if needed
+import { Product } from '@/lib/models/product';
 import { parseUserFromReq } from '@/lib/utils/auth';
 
 export default async function handler(
@@ -13,7 +13,7 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const user = await parseUserFromReq(req);
-      const products = await Product.find({ user: user._id }).sort({ createdAt: -1 }); // latest first
+      const products = await Product.find({ user: user._id }).sort({ createdAt: -1 });
       res.status(200).json(products);
     } catch (error: any) {
       console.error('Error fetching products:', error);

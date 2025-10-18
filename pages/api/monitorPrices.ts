@@ -28,17 +28,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const isAmazon = url.includes("amazon");
             const currencySymbol = isLazada ? "₱" : isAmazon ? "$" : "";
 
-            // 🔍 Case-insensitive title match
+            // Case-insensitive title match
             const mongoProduct = await db
                 .collection("allproducts")
                 .findOne({ title: { $regex: new RegExp(`^${title}$`, "i") } });
 
             if (!mongoProduct) {
-                console.warn(`⚠️ Product not found in MongoDB: ${title}`);
+                console.warn(`Product not found in MongoDB: ${title}`);
                 continue;
             }
 
-            // 🧹 Clean price values (remove ₱, $, commas, etc.)
+            // Clean price values (remove ₱, $, commas, etc.)
             const cleanPrice = (value: any) => {
                 if (!value) return NaN;
                 return Number(String(value).replace(/[^\d.]/g, ""));
@@ -48,13 +48,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const oldPrice = cleanPrice(currentPrice);
 
             if (isNaN(mongoPrice) || isNaN(oldPrice)) {
-                console.warn(`⚠️ Invalid price format for "${title}" (${currentPrice} → ${mongoProduct.currentPrice})`);
+                console.warn(`Invalid price format for "${title}" (${currentPrice} → ${mongoProduct.currentPrice})`);
                 continue;
             }
 
-            // 💰 Price drop detection
+            // Price drop detection
             if (mongoPrice < oldPrice) {
-                console.log(`💰 Price drop detected for "${title}": ${oldPrice} → ${mongoPrice}`);
+                console.log(`Price drop detected for "${title}": ${oldPrice} → ${mongoPrice}`);
 
                 const subject = `Greetings! Price Drop Alert: ${title}`;
                 const message = `
@@ -68,10 +68,10 @@ Check it out here: ${url}
 - TrackTag Price Monitor
         `;
 
-                // ✉️ Send alert email
+                // Send alert email
                 await sendEmail(email, subject, message);
 
-                // 📝 Save discount log
+                // Save discount log
                 const discountPercent = (((oldPrice - mongoPrice) / oldPrice) * 100).toFixed(2);
                 await db.collection("discountlogs").insertOne({
                     productTitle: title,
@@ -84,7 +84,7 @@ Check it out here: ${url}
                 });
 
 
-                // 🔄 Update Firebase with new price
+                // Update Firebase with new price
                 await TrackedProducts.set(user.toString(), {
                     ...tracked,
                     currentPrice: mongoPrice.toString(),
@@ -92,7 +92,7 @@ Check it out here: ${url}
 
                 alerts.push({ title, oldPrice, newPrice: mongoPrice, email });
             } else {
-                console.log(`📊 No price drop for "${title}" (${oldPrice} → ${mongoPrice})`);
+                console.log(`No price drop for "${title}" (${oldPrice} → ${mongoPrice})`);
             }
         }
 
@@ -100,13 +100,13 @@ Check it out here: ${url}
             return res.status(200).json({ message: "No price drops detected." });
         }
 
-        console.log(`📧 ${alerts.length} email alert(s) sent successfully.`);
+        console.log(`${alerts.length} email alert(s) sent successfully.`);
         return res.status(200).json({
             message: `${alerts.length} alert(s) sent successfully.`,
             alerts,
         });
     } catch (error: any) {
-        console.error("❌ Error monitoring prices:", error);
+        console.error("Error monitoring prices:", error);
         return res.status(500).json({ error: error.message });
     }
 }

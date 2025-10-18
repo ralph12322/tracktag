@@ -1,7 +1,4 @@
-// /pages/api/test/test-firestore.ts
-
 import type { NextApiRequest, NextApiResponse } from "next";
-// Adjust relative path if necessary
 import db from "../../../lib/firebase/firebaseAdmin"; 
 
 type Data = {

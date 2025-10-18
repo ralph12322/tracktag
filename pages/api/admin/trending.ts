@@ -19,30 +19,30 @@ interface Product {
   soldCount?: string;
 }
 
-// In-flight request lock
+
 const runningRequests = new Map<string, boolean>();
 
-// Random delay helper
+
 const randomDelay = (min: number, max: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, Math.random() * (max - min) + min));
 
-// Fake human mouse moves
+
 const humanMouseMovement = async (page: Page): Promise<void> => {
   await page.mouse.move(Math.random() * 1200, Math.random() * 800);
 };
 
-// Smooth random scrolling
+
 const scrollRandomly = async (page: Page): Promise<void> => {
-  const scrolls = Math.floor(Math.random() * 4) + 2; // 2–5 scrolls
+  const scrolls = Math.floor(Math.random() * 4) + 2; 
   for (let i = 0; i < scrolls; i++) {
     await page.evaluate(() => {
       window.scrollBy(0, Math.random() * 400 + 200);
     });
-    await randomDelay(1000, 3000); // slower delay between scrolls
+    await randomDelay(1000, 3000); 
   }
 };
 
-// Lazada scraper only
+
 const scrapeLazada = async (page: Page): Promise<Product[]> => {
   console.log("🔍 Starting Lazada scraping...");
 
@@ -63,7 +63,7 @@ const scrapeLazada = async (page: Page): Promise<Product[]> => {
       await scrollRandomly(page);
       await randomDelay(2000, 4000);
 
-      // Check product containers
+      
       const selector = ".Bm3ON, [data-qa-locator='product-item'], .cRjKsc, .buTCk";
       await page.waitForSelector(selector, { timeout: 10000 });
 
@@ -126,17 +126,17 @@ const scrapeLazada = async (page: Page): Promise<Product[]> => {
       }, selector);
 
       if (products.length > 0) {
-        console.log(`✅ Lazada: Found ${products.length} products`);
+        console.log(`Lazada: Found ${products.length} products`);
         return products;
       }
     } catch (err) {
-      console.log(`❌ Failed for URL ${url}:`, (err as Error).message);
-      await randomDelay(2000, 5000); // wait before next URL
+      console.log(`Failed for URL ${url}:`, (err as Error).message);
+      await randomDelay(2000, 5000); 
       continue;
     }
   }
 
-  console.log("⚠️ No Lazada products scraped");
+  console.log("No Lazada products scraped");
   return [];
 };
 

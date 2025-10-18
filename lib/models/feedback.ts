@@ -20,7 +20,7 @@ const feedbackSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: { createdAt: true, updatedAt: false }, // only store created date
+    timestamps: { createdAt: true, updatedAt: false },
   }
 );
 

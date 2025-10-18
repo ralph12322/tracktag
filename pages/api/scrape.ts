@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await connectToDB();
 
-    // ✅ Get the user from the token
+    // Get the user from the token
     const user = await getUserFromRequest(req);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -37,14 +37,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
     if (existingProduct && trackedProduct) {
-      console.log('💾 Product already listed');
+      console.log('Product already listed');
       const savedProduct = await Product.findOneAndUpdate(
         { title: product.title },
         { ...product, user: user._id },
         { upsert: true, new: true }
       );
 
-      console.log('💾 Product already listed, updating if needed')
+      console.log('Product already listed, updating if needed')
       await TrackedProducts.set(user._id.toString(), {
         user: user._id,
         title: product.title,
@@ -64,9 +64,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       email: user.email,
       url: product.url,
     });
-    console.log('💾 Product added to Firestore');
+    console.log('Product added to Firestore');
 
-    // ✅ Inject user._id into product before saving
+    // Inject user._id into product before saving
     const saveProduct = new Product({
       ...product,
       user: user._id,
@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await saveProduct.save();
 
-    console.log('💾 Product saved with user');
+    console.log('Product saved with user');
     return res.status(200).json(saveProduct);
   } catch (error: any) {
     console.log('Error scraping product:', error);
