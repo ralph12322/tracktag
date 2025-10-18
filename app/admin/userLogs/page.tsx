@@ -274,66 +274,6 @@ export default function UserLogsPage() {
           </div>
         </main>
       </div>
-
-      <style jsx>{`
-        /* --- Existing CSS --- */
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(50px, -80px) scale(1.1); }
-          66% { transform: translate(-30px, 40px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-          animation: blob 8s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        .animation-delay-150 {
-          animation-delay: 150ms;
-        }
-        .animation-delay-300 {
-          animation-delay: 300ms;
-        }
-
-        /* --- Custom Scrollbar Styles (WebKit - Chrome, Safari, Edge) --- */
-        .logs-table-container::-webkit-scrollbar, 
-        .logs-mobile-container::-webkit-scrollbar {
-          width: 8px; /* Vertical scrollbar width */
-          height: 8px; /* Horizontal scrollbar height */
-        }
-
-        .logs-table-container::-webkit-scrollbar-track, 
-        .logs-mobile-container::-webkit-scrollbar-track {
-          background: rgba(15, 23, 42, 0.5); /* Background: slate-950/50 */
-          border-radius: 10px;
-        }
-
-        .logs-table-container::-webkit-scrollbar-thumb, 
-        .logs-mobile-container::-webkit-scrollbar-thumb {
-          background-color: #0d9488; /* Thumb color: teal-600 */
-          border-radius: 10px;
-          border: 2px solid rgba(15, 23, 42, 0.7); /* Adds padding/separation from track */
-          transition: background-color 0.3s;
-        }
-
-        .logs-table-container::-webkit-scrollbar-thumb:hover, 
-        .logs-mobile-container::-webkit-scrollbar-thumb:hover {
-          background-color: #2dd4bf; /* Hover color: teal-400 */
-        }
-
-        /* --- Custom Scrollbar Styles (Firefox) --- */
-        /* Note: Firefox styling is limited compared to WebKit */
-        .logs-table-container, 
-        .logs-mobile-container {
-            scrollbar-width: thin; /* 'auto' or 'thin' */
-            scrollbar-color: #0d9488 rgba(15, 23, 42, 0.5); /* thumb-color track-color */
-        }
-
-      `}</style>
     </div>
   );
 }
