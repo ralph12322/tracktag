@@ -150,14 +150,24 @@ async function loginAndGetCookies(page: any) {
   return cookies;
 }
 
-function analyzeSentiment(texts: string[]): 'good' | 'pwede na' | 'bad' {
-  const totalScore = texts.reduce((sum, t) => sum + sentiment.analyze(t).score, 0);
-  if (totalScore >= 3 && totalScore < 4) return 'pwede na';
-  if (totalScore >= 4) return 'good';
-  if (totalScore < -1) return 'bad';
-  return 'bad';
-}
 
+const VERDICTS = {
+  GOOD: 'good',
+  OKAY: 'pwede na',
+  BAD: 'bad'
+} as const;
+
+function analyzeSentiment(texts: string[]) {
+  const totalScore = texts.reduce((sum, t) => sum + sentiment.analyze(t).score, 0);
+
+  const verdict = totalScore >= 4
+    ? VERDICTS.GOOD
+    : totalScore >= 3
+      ? VERDICTS.OKAY
+      : VERDICTS.BAD;
+
+  return verdict;
+}
 
 // ---------------------- Main scraper ----------------------
 export async function scrapeProduct(url: string): Promise<ProductData | null> {
