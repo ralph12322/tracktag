@@ -158,14 +158,17 @@ const VERDICTS = {
 } as const;
 
 function analyzeSentiment(texts: string[]) {
+  if (texts.length === 0) return VERDICTS.BAD; // Handle empty case
+  
   const totalScore = texts.reduce((sum, t) => sum + sentiment.analyze(t).score, 0);
-
-  const verdict = totalScore >= 4
+  const averageScore = totalScore / texts.length; // KEY FIX
+  
+  const verdict = averageScore >= 1.5  // Adjusted thresholds
     ? VERDICTS.GOOD
-    : totalScore >= 3
+    : averageScore >= 0.5
       ? VERDICTS.OKAY
       : VERDICTS.BAD;
-
+  
   return verdict;
 }
 
