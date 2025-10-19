@@ -360,13 +360,13 @@ export default function UserProfile() {
                                 {product.originalPrice}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${
-                                  product.isActive 
-                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
-                                    : 'bg-red-500/20 text-red-300 border-red-500/50'
-                                }`}>
-                                  <span className={`w-2 h-2 rounded-full ${product.isActive ? 'bg-emerald-400' : 'bg-red-400'} animate-pulse`}></span>
-                                  {product.isActive ? 'Active' : 'Inactive'}
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border
+                                  
+                                    'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
+                                   
+                                `}>
+                                  <span className={`w-2 h-2 rounded-full 'bg-emerald-400' animate-pulse`}></span>
+                                  Active
                                 </span>
                               </td>
                             </tr>
