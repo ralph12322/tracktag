@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   BarChart,
@@ -68,40 +68,6 @@ const StarRating = ({ stars }: { stars: number }) => (
 
 const DisplayProduct = ({ product }: Props) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [priceHistoryData, setPriceHistoryData] = useState<any>(null);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [historyError, setHistoryError] = useState<string | null>(null);
-
-  // Fetch real price history data
-  useEffect(() => {
-    if (product?.title) {
-      setIsLoadingHistory(true);
-      setHistoryError(null);
-      
-      // CHANGED: Updated endpoint to match your API filename
-      fetch(`/api/priceHistory?title=${encodeURIComponent(product.title)}`)
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`API returned ${res.status}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          if (data.success) {
-            setPriceHistoryData(data.data);
-          } else {
-            setHistoryError(data.message || 'Failed to load price history');
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch price history:', err);
-          setHistoryError('Unable to load price history');
-        })
-        .finally(() => {
-          setIsLoadingHistory(false);
-        });
-    }
-  }, [product?.title]);
 
   if (!product) {
     return (
@@ -115,67 +81,35 @@ const DisplayProduct = ({ product }: Props) => {
   const basePrice = toNumber(product.originalPrice);
   const currentPrice = toNumber(product.currentPrice) || basePrice;
 
-  // Use real price history data or fallback to mock if not available
-  let data: Array<{ month: string; price: number }> = [];
-  let maxPrice = currentPrice;
-  let minPrice = currentPrice;
-  let isRealData = false;
+  // Generate mock data for chart
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
-  if (priceHistoryData && priceHistoryData.priceHistory && priceHistoryData.priceHistory.length > 0) {
-    isRealData = true;
-    
-    // Use real data from API
-    data = priceHistoryData.priceHistory.map((item: any) => {
-      const date = new Date(item.date);
-      const monthName = date.toLocaleString('default', { month: 'short' });
-      const day = date.getDate();
-      return {
-        month: `${monthName} ${day}`,
-        price: item.price
-      };
-    });
+  const pricing = months.reduce<Record<string, number>>((acc, month) => {
+    const discountRate = Math.random() * 0.45 + 0.05;
+    const discount = currentPrice * discountRate;
+    let price = currentPrice - discount;
 
-    // Get statistics from API if available
-    if (priceHistoryData.statistics) {
-      maxPrice = priceHistoryData.statistics.highestPrice;
-      minPrice = priceHistoryData.statistics.lowestPrice;
-    } else {
-      // Calculate from data
-      const prices = data.map(d => d.price);
-      maxPrice = Math.max(...prices);
-      minPrice = Math.min(...prices);
+    if (basePrice > 0) {
+      const minBound = Math.min(basePrice, currentPrice) * 0.5;
+      const maxBound = Math.max(basePrice, currentPrice);
+      price = Math.min(Math.max(price, minBound), maxBound);
     }
-  } else if (!isLoadingHistory && !historyError) {
-    // Fallback to mock data generation if API fails or returns no history
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
 
-    const pricing = months.reduce<Record<string, number>>((acc, month) => {
-      const discountRate = Math.random() * 0.45 + 0.05;
-      const discount = currentPrice * discountRate;
-      let price = currentPrice - discount;
+    acc[month] = Math.round(price * 100) / 100;
+    return acc;
+  }, {});
 
-      if (basePrice > 0) {
-        const minBound = Math.min(basePrice, currentPrice) * 0.5;
-        const maxBound = Math.max(basePrice, currentPrice);
-        price = Math.min(Math.max(price, minBound), maxBound);
-      }
-
-      acc[month] = Math.round(price * 100) / 100;
-      return acc;
-    }, {});
-
-    data = Object.entries(pricing).map(([month, price]) => ({ month, price }));
-    const prices = data.map((d) => d.price);
-    maxPrice = Math.max(...prices);
-    minPrice = Math.min(...prices);
-  }
-
+  const data = Object.entries(pricing).map(([month, price]) => ({ month, price }));
+  const prices = data.map((d) => d.price);
+  const maxPrice = Math.max(...prices);
+  const minPrice = Math.min(...prices);
   const averageStars = product.reviews?.length
     ? product.reviews.reduce((sum, r) => sum + r.stars, 0) / product.reviews.length
     : 0;
+
 
   const colorDecider = (analysis: string) => {
     switch (analysis) {
@@ -282,160 +216,37 @@ const DisplayProduct = ({ product }: Props) => {
 
         {/* Price Trend */}
         <div className="mt-8 p-4 sm:p-6 bg-slate-700/40 rounded-2xl border border-teal-500/20">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg sm:text-xl font-bold text-slate-100">
-              Price Trend
-            </h3>
-            {isRealData && (
-              <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full border border-emerald-500/50">
-                Historical Data
-              </span>
-            )}
-            {!isRealData && !isLoadingHistory && !historyError && (
-              <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full border border-yellow-500/50">
-                Estimated
-              </span>
-            )}
+          <h3 className="text-lg sm:text-xl font-bold text-slate-100 mb-4">
+            Price Trend (Jan–Dec)
+          </h3>
+          <div className="h-64 sm:h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(15, 23, 42, 0.3)" />
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} tickFormatter={(m) => m.slice(0, 3)} />
+                <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                <Tooltip
+                  formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`}
+                  contentStyle={{ background: '#1e293b', borderRadius: '0.75rem', border: '1px solid rgba(20, 184, 166, 0.3)', color: '#e2e8f0' }}
+                />
+                <Bar dataKey="price" radius={[8, 8, 0, 0]}>
+                  {data.map((entry, i) => {
+                    let color = '#06b6d4';
+                    if (entry.price === maxPrice) color = '#ef4444';
+                    if (entry.price === minPrice) color = '#10b981';
+                    return <Cell key={i} fill={color} />;
+                  })}
+                  <LabelList dataKey="price" position="top" formatter={(l) => `${currencySymbol}${Number(l).toFixed(0)}`} style={{ fontSize: 11, fill: '#cbd5e1', fontWeight: 600 }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          
-          {isLoadingHistory ? (
-            <div className="h-64 sm:h-80 w-full flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-                <div className="text-slate-400">Loading price history...</div>
-              </div>
-            </div>
-          ) : historyError ? (
-            <div className="h-64 sm:h-80 w-full flex items-center justify-center">
-              <div className="flex flex-col items-center gap-3 text-center px-4">
-                <svg className="w-12 h-12 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div className="text-slate-400">{historyError}</div>
-                <button
-                  onClick={() => {
-                    setHistoryError(null);
-                    setIsLoadingHistory(true);
-                    fetch(`/api/priceHistory?title=${encodeURIComponent(product.title)}`)
-                      .then(res => res.json())
-                      .then(data => {
-                        if (data.success) {
-                          setPriceHistoryData(data.data);
-                        }
-                      })
-                      .catch(err => setHistoryError('Unable to load price history'))
-                      .finally(() => setIsLoadingHistory(false));
-                  }}
-                  className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
-                >
-                  Try Again
-                </button>
-              </div>
-            </div>
-          ) : data.length > 0 ? (
-            <>
-              <div className="h-64 sm:h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(15, 23, 42, 0.3)" />
-                    <XAxis 
-                      dataKey="month" 
-                      tick={{ fontSize: 11, fill: '#94a3b8' }} 
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                    />
-                    <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} />
-                    <Tooltip
-                      formatter={(v: number) => `${currencySymbol}${v.toFixed(2)}`}
-                      contentStyle={{ 
-                        background: '#1e293b', 
-                        borderRadius: '0.75rem', 
-                        border: '1px solid rgba(20, 184, 166, 0.3)', 
-                        color: '#e2e8f0' 
-                      }}
-                    />
-                    <Bar dataKey="price" radius={[8, 8, 0, 0]}>
-                      {data.map((entry, i) => {
-                        let color = '#06b6d4';
-                        if (entry.price === maxPrice) color = '#ef4444';
-                        if (entry.price === minPrice) color = '#10b981';
-                        return <Cell key={i} fill={color} />;
-                      })}
-                      <LabelList 
-                        dataKey="price" 
-                        position="top" 
-                        formatter={(l) => `${currencySymbol}${Number(l).toFixed(0)}`} 
-                        style={{ fontSize: 11, fill: '#cbd5e1', fontWeight: 600 }} 
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
 
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                  <span className="text-slate-400">Lowest: {currencySymbol}{minPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-slate-400">Highest: {currencySymbol}{maxPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                  <span className="text-slate-400">Regular</span>
-                </div>
-              </div>
-
-              {/* Price Statistics */}
-              {priceHistoryData?.statistics && (
-                <div className="mt-4 p-4 bg-slate-800/60 rounded-xl border border-teal-500/10">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <p className="text-xs text-slate-400 mb-1">Average</p>
-                      <p className="text-sm font-semibold text-slate-200">
-                        {currencySymbol}{priceHistoryData.statistics.averagePrice.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-slate-400 mb-1">Change</p>
-                      <p className={`text-sm font-semibold ${
-                        priceHistoryData.statistics.priceChange < 0 ? 'text-emerald-400' : 
-                        priceHistoryData.statistics.priceChange > 0 ? 'text-red-400' : 'text-slate-400'
-                      }`}>
-                        {priceHistoryData.statistics.priceChange > 0 ? '+' : ''}
-                        {currencySymbol}{priceHistoryData.statistics.priceChange.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-slate-400 mb-1">% Change</p>
-                      <p className={`text-sm font-semibold ${
-                        priceHistoryData.statistics.priceChangePercent < 0 ? 'text-emerald-400' : 
-                        priceHistoryData.statistics.priceChangePercent > 0 ? 'text-red-400' : 'text-slate-400'
-                      }`}>
-                        {priceHistoryData.statistics.priceChangePercent > 0 ? '+' : ''}
-                        {priceHistoryData.statistics.priceChangePercent.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-slate-400 mb-1">Trend</p>
-                      <p className="text-sm font-semibold text-slate-200 capitalize">
-                        {priceHistoryData.statistics.trend === 'decreasing' && '📉 '}
-                        {priceHistoryData.statistics.trend === 'increasing' && '📈 '}
-                        {priceHistoryData.statistics.trend === 'stable'}
-                        {priceHistoryData.statistics.trend}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="h-64 sm:h-80 w-full flex items-center justify-center">
-              <div className="text-slate-400">No price history available</div>
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded-full"></div><span className="text-slate-400">Lowest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full"></div><span className="text-slate-400">Highest</span></div>
+            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-cyan-500 rounded-full"></div><span className="text-slate-400">Regular</span></div>
+          </div>
         </div>
       </div>
 
@@ -479,6 +290,7 @@ const DisplayProduct = ({ product }: Props) => {
           <p className="text-slate-400 italic text-center">No reviews available.</p>
         )}
       </div>
+
     </div>
   );
 };
