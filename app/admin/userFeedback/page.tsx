@@ -19,7 +19,7 @@ export default function UserFeedbackPage() {
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const res = await fetch('/api/admin/feedback');
+        const res = await fetch('/api/admin/feedbackAdmin');
         const data = await res.json();
         setFeedbacks(data.data);
       } catch (error) {

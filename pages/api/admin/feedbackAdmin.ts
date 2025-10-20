@@ -17,36 +17,13 @@ export default async function handler(
 ) {
   await connectToDB();
 
-  if (req.method === 'POST') {
-    const { name, email, message } = req.body;
-
-    // Validate input
-    const realUser = await User.findOne({
-      username: name.trim(),
-      email: email.trim().toLowerCase(),
-    });
-    if (!realUser) return res.status(404).json({ success: false, message: 'User not found.' });
-
-
-    if (!name || !email || !message) {
-      return res.status(400).json({ success: false, message: 'All fields are required.' });
-    }
-
-    try {
-      const feedback = await Feedback.create({ name, email, message });
-      return res.status(201).json({ success: true, data: feedback });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: 'Server error' });
-    }
-  }
-  else if (req.method === 'GET') {
+ if (req.method === 'GET') {
     try {
       const feedbacks = await Feedback.find();
-      const { good, bad, all } = filterGoodFeedbacks(feedbacks);
+      const { all } = filterGoodFeedbacks(feedbacks);
 
       // Convert Mongoose documents to plain objects
-      const cleanGood = good.map(f => ({
+      const cleanGood = all.map(f => ({
         _id: f._doc._id,
         name: f._doc.name,
         email: f._doc.email,

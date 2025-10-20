@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email: user.email,
         url: product.url,
       })
-      return res.status(200).json({message: "💾 Product already listed", productInMdb: savedProduct, productInft: trackedProduct });
+      return res.status(200).json(savedProduct);
     }
 
 
