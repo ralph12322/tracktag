@@ -60,6 +60,14 @@ export default function AdminPage() {
     ...value,
   }));
 
+  const formatPrice = (price: number | string, platform: string) => {
+    if (!price) return "N/A";
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (isNaN(numPrice)) return "N/A";
+    const symbol = platform.toLowerCase() === "amazon" ? "$" : "₱";
+    return `${symbol}${numPrice.toFixed(2)}`;
+  };
+
   const topPlatform =
     (Object.entries(platformCount) as [string, number][])
       .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
@@ -234,12 +242,8 @@ export default function AdminPage() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-5xl">{card.icon}</div>
                     <div className="flex gap-1">
-                      {/* Note: Tailwind JIT/AOT sometimes fails with dynamic classes like bg-${card.accentColor}-400.
-                          If these colors don't work, you'll need to define the full classes like bg-teal-400, bg-emerald-400, bg-cyan-400 somewhere in your code or config. 
-                          Assuming they work for now based on the original code structure.
-                      */}
-                      <span className={`w-2 h-2 rounded-full bg-${card.accentColor}-400 animate-pulse`}></span>
-                      <span className={`w-2 h-2 rounded-full bg-${card.accentColor}-400 animate-pulse animation-delay-150`}></span>
+                      <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                      <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse animation-delay-150"></span>
                     </div>
                   </div>
                   <h3 className="text-slate-400 font-medium text-sm uppercase tracking-wider mb-3">
@@ -329,7 +333,7 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td className="p-4 font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent text-base">
-                          ${typeof p.currentPrice === 'number' ? p.currentPrice.toFixed(2) : p.currentPrice}
+                          {formatPrice(p.currentPrice, p.platform)}
                         </td>
                         <td className="p-4 text-slate-300 font-medium">{p.user?.username || 'N/A'}</td>
                       </tr>
@@ -377,7 +381,7 @@ export default function AdminPage() {
                         <div>
                           <div className="text-xs text-teal-300 font-semibold uppercase tracking-wide mb-1">Price</div>
                           <div className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                            ${typeof p.currentPrice === 'number' ? p.currentPrice.toFixed(2) : p.currentPrice}
+                            {formatPrice(p.currentPrice, p.platform)}
                           </div>
                         </div>
                         <div className="text-right">
