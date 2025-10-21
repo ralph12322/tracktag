@@ -2,6 +2,7 @@
 
 import AdminSideBar from '@/components/AdminSideBar';
 import { useEffect, useState } from 'react';
+import { MessageSquare, CalendarDays, BarChart3 } from "lucide-react";
 
 type Feedback = {
   _id: string;
@@ -94,22 +95,22 @@ export default function UserFeedbackPage() {
               { 
                 title: 'Total Feedback', 
                 value: feedbacks.length, 
-                gradient: 'from-teal-400 to-cyan-400',
-                icon: '💬',
+                gradient: 'from-cyan-400 to-cyan-400',
+                icon: <MessageSquare className="w-10 h-10 text-cyan-400 icon-glow" />,
                 accentColor: 'teal'
               },
               { 
                 title: 'Today', 
                 value: todayCount, 
-                gradient: 'from-emerald-400 to-teal-400',
-                icon: '📅',
+                gradient: 'from-orange-400 to-teal-400',
+                icon: <CalendarDays className="w-10 h-10 text-orange-400 icon-glow" />,
                 accentColor: 'emerald'
               },
               { 
                 title: 'This Week', 
                 value: thisWeekCount, 
-                gradient: 'from-cyan-400 to-blue-400',
-                icon: '📊',
+                gradient: 'from-blue-400 to-blue-400',
+                icon: <BarChart3 className="w-10 h-10 text-blue-400 icon-glow" />,
                 accentColor: 'cyan'
               },
             ].map((card, i) => (

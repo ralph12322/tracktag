@@ -2,6 +2,7 @@
 
 import AdminSideBar from '@/components/AdminSideBar';
 import { useEffect, useState } from 'react';
+import { BarChart3, CheckCircle, XCircle, Lock } from "lucide-react";
 
 type UserLog = {
   _id: string;
@@ -87,29 +88,29 @@ export default function UserLogsPage() {
               { 
                 title: 'Total Logs', 
                 value: logs.length, 
-                gradient: 'from-teal-400 to-cyan-400',
-                icon: '📊',
+                gradient: 'from-cyan-400 to-cyan-200',
+                icon: <BarChart3 className="w-10 h-10 text-cyan-400" />,
                 accentColor: 'teal'
               },
               { 
                 title: 'Successful', 
                 value: successCount, 
-                gradient: 'from-emerald-400 to-teal-400',
-                icon: '✅',
+                gradient: 'from-green-400 to-teal-400',
+                icon: <CheckCircle className="w-10 h-10 text-green-400" />,
                 accentColor: 'emerald'
               },
               { 
                 title: 'Failed Attempts', 
                 value: failedCount, 
                 gradient: 'from-red-400 to-orange-400',
-                icon: '❌',
+                icon: <XCircle className="w-10 h-10 text-red-400" />,
                 accentColor: 'red'
               },
               { 
                 title: 'Login/Signup', 
                 value: `${loginCount}/${signupCount}`, 
-                gradient: 'from-cyan-400 to-blue-400',
-                icon: '🔐',
+                gradient: 'from-yellow-400 to-blue-400',
+                icon: <Lock className="w-10 h-10 text-yellow-400" />,
                 accentColor: 'cyan'
               },
             ].map((card, i) => (

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Package, Trophy, CheckSquare } from "lucide-react";
 import { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import AdminSideBar from '@/components/AdminSideBar';
@@ -12,6 +12,7 @@ type Product = {
   currentPrice: number;
   discount: string;
   createdAt: string;
+  isActive: Boolean;
   user?: {
     _id: string;
     username: string;
@@ -33,7 +34,7 @@ export default function AdminPage() {
   }, []);
 
   const totalTracked = products.length;
-  const activeTracking = products.filter((p) => p.discount !== '').length;
+  const activeTracking = products.filter((p) => p.isActive === true).length;
 
   const platformCount = products.reduce((acc: any, product: any) => {
     acc[product.platform] = (acc[product.platform] || 0) + 1;
@@ -214,21 +215,21 @@ export default function AdminPage() {
                 title: 'Total Tracked Products',
                 value: totalTracked,
                 gradient: 'from-teal-400 to-cyan-400',
-                icon: '📦',
+                icon: <Package className="w-8 h-8 text-cyan-400" />,
                 accentColor: 'teal'
               },
               {
                 title: 'Active Tracking',
                 value: activeTracking,
                 gradient: 'from-emerald-400 to-teal-400',
-                icon: '✅',
+                icon: <CheckSquare className="w-8 h-8 text-green-400" />  ,
                 accentColor: 'emerald'
               },
               {
                 title: 'Top Platform',
                 value: topPlatform,
                 gradient: 'from-cyan-400 to-blue-400',
-                icon: '🏆',
+                icon: <Trophy className="w-8 h-8 text-yellow-400" />,
                 accentColor: 'cyan'
               },
             ].map((card, i) => (

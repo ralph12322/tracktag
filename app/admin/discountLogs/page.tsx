@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AdminSideBar from '@/components/AdminSideBar';
+import { Megaphone, Flame, Percent } from "lucide-react";
 
 type DiscountLog = {
   _id: string;
@@ -110,9 +111,9 @@ export default function DiscountLogsPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {[
-              { title: 'Total Alerts', value: logs.length, gradient: 'from-teal-400 to-cyan-400', icon: '📢' },
-              { title: 'Top Discount', value: `${topDiscount}%`, gradient: 'from-emerald-400 to-teal-400', icon: '🔥' },
-              { title: 'Average Discount', value: `${avgDiscount}%`, gradient: 'from-blue-400 to-cyan-400', icon: '💸' },
+              { title: 'Total Alerts', value: logs.length, gradient: 'from-red-400 to-cyan-400', icon: <Megaphone className="w-10 h-10 text-red-400 icon-glow" /> },
+              { title: 'Top Discount', value: `${topDiscount}%`, gradient: 'from-orange-400 to-teal-400', icon: <Flame className="w-10 h-10 text-orange-400 icon-glow" /> },
+              { title: 'Average Discount', value: `${avgDiscount}%`, gradient: 'from-blue-400 to-cyan-400', icon: <Percent className="w-10 h-10 text-blue-400 icon-glow" /> },
             ].map((card, i) => (
               <div key={i} className="relative group">
                 <div className={`absolute inset-0 bg-gradient-to-r ${card.gradient} rounded-xl sm:rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
