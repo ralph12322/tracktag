@@ -431,9 +431,9 @@ export default function UserProfile() {
                                       Loading...
                                     </span>
                                   ) : product.isActive ? (
-                                    'Deactivate'
+                                    "Disable Emails!"
                                   ) : (
-                                    'Activate'
+                                    'Enable Emails!'
                                   )}
                                 </button>
                               </td>
