@@ -14,9 +14,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const products = await Product.find({ user: user._id });
 
     const totalProducts = products.length;
-    const activeTracks = products.filter(p => p.analysis === '').length;
-    const pastTracks = products.filter(p => p.analysis !== '').length;
-
+    const activeTracks = products.filter(p => p.isActive).length;
+    const pastTracks = products.filter(p => !p.isActive).length;
+    console.log(activeTracks, "---", pastTracks)
     res.status(200).json({ totalProducts, activeTracks, pastTracks });
   } catch (err) {
     console.error(err);

@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema({
   platform: { type: String },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   url: { type: String },
+  isActive: { type: Boolean },
   reviews: { type: [reviewSchema], default: [] },  // ✅ Added reviews field
   analysis: { type: String, default: '' },          // ✅ Added analysis field
   createdAt: { type: Date, default: Date.now },

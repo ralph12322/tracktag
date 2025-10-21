@@ -29,52 +29,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Failed to scrape product or missing title' });
     }
 
-    //mongo stored product update
-    const existingProduct = await Product.findOne({ title: product.title });
+    // Check if product exists in MongoDB
+    const existingProduct = await Product.findOne({ title: product.title, user: user._id });
 
-    //firestore tracked product update
-    const trackedProduct = await TrackedProducts.get(user._id.toString());
-
-
-    if (existingProduct && trackedProduct) {
-      console.log('Product already listed');
+    if (existingProduct) {
+      console.log('Product already listed, updating...');
+      
+      // Update MongoDB
       const savedProduct = await Product.findOneAndUpdate(
-        { title: product.title },
+        { title: product.title, user: user._id },
         { ...product, user: user._id },
-        { upsert: true, new: true }
+        { new: true }
       );
 
-      console.log('Product already listed, updating if needed')
-      await TrackedProducts.set(user._id.toString(), {
-        user: user._id,
+      // Update Firestore using the MongoDB _id as the document ID
+      await TrackedProducts.set(savedProduct._id.toString(), {
+        user: user._id.toString(),
         title: product.title,
         currentPrice: product.currentPrice,
+        isActive: product.isActive,
         email: user.email,
         url: product.url,
-      })
+      });
+
       return res.status(200).json(savedProduct);
     }
 
-
-    console.log('➕ Adding new tracked product to Firestore')
-    await TrackedProducts.set(user._id.toString(), {
+    // Create new product in MongoDB first to get the _id
+    const saveProduct = new Product({
+      ...product,
       user: user._id,
+    });
+    await saveProduct.save();
+
+    console.log('➕ Adding new tracked product to Firestore');
+    // Use MongoDB _id as Firestore document ID
+    await TrackedProducts.set(saveProduct._id.toString(), {
+      user: user._id.toString(),
       title: product.title,
       currentPrice: product.currentPrice,
+      isActive: product.isActive,
       email: user.email,
       url: product.url,
     });
     console.log('Product added to Firestore');
 
-    // Inject user._id into product before saving
-    const saveProduct = new Product({
-      ...product,
-      user: user._id,
-    });
-
-    await saveProduct.save();
-
-    console.log('Product saved with user');
     return res.status(200).json(saveProduct);
   } catch (error: any) {
     console.log('Error scraping product:', error);

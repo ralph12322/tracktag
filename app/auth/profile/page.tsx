@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -45,6 +45,7 @@ export default function UserProfile() {
     email: user?.email || '',
     message: '',
   });
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const [visibleCount, setVisibleCount] = useState(10);
 
@@ -61,6 +62,7 @@ export default function UserProfile() {
 
         const userData = await userRes.json();
         const statsData = await statsRes.json();
+        console.log(statsData)
 
         setUser(userData.user);
         setStats(statsData);
@@ -89,6 +91,42 @@ export default function UserProfile() {
     };
     fetchProducts();
   }, []);
+
+  const handleToggleActive = async (productId: string, currentStatus: boolean) => {
+    setTogglingId(productId);
+    try {
+      const res = await fetch(`/api/user/products/${productId}/toggle`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !currentStatus }),
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Failed to update status');
+
+      // Update local state
+      setProducts(prev =>
+        prev.map(p =>
+          p._id === productId ? { ...p, isActive: !currentStatus } : p
+        )
+      );
+
+      // Refresh stats
+      const statsRes = await fetch('/api/user/stats', { credentials: 'include' });
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        console.log(statsData)
+        setStats(statsData);
+      }
+
+      toast.success(`Product ${!currentStatus ? 'activated' : 'deactivated'}!`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update product status');
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const handleShowMore = () => {
     setVisibleCount((prev) => prev + 5);
@@ -331,6 +369,9 @@ export default function UserProfile() {
                             <th className="px-6 py-4 text-left text-xs font-bold text-teal-300 uppercase tracking-wider">
                               Status
                             </th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-teal-300 uppercase tracking-wider">
+                              Action
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="bg-slate-800/20 divide-y divide-slate-700/30">
@@ -360,14 +401,41 @@ export default function UserProfile() {
                                 {product.originalPrice}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border
-                                  
-                                    'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
-                                   
-                                `}>
-                                  <span className={`w-2 h-2 rounded-full 'bg-emerald-400' animate-pulse`}></span>
-                                  Active
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${
+                                  product.isActive 
+                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
+                                    : 'bg-slate-500/20 text-slate-400 border-slate-500/50'
+                                }`}>
+                                  <span className={`w-2 h-2 rounded-full ${
+                                    product.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
+                                  }`}></span>
+                                  {product.isActive ? 'Active' : 'Inactive'}
                                 </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <button
+                                  onClick={() => handleToggleActive(product._id, product.isActive)}
+                                  disabled={togglingId === product._id}
+                                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                                    product.isActive
+                                      ? 'bg-red-500/20 text-red-300 border border-red-500/50 hover:bg-red-500/30 hover:border-red-400'
+                                      : 'bg-teal-500/20 text-teal-300 border border-teal-500/50 hover:bg-teal-500/30 hover:border-teal-400'
+                                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                  {togglingId === product._id ? (
+                                    <span className="flex items-center gap-2">
+                                      <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      Loading...
+                                    </span>
+                                  ) : product.isActive ? (
+                                    'Deactivate'
+                                  ) : (
+                                    'Activate'
+                                  )}
+                                </button>
                               </td>
                             </tr>
                           ))}

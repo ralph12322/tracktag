@@ -29,6 +29,7 @@ type ProductData = {
   originalPrice: string;
   discount: string;
   imageUrl: string;
+  isActive: Boolean;
   url: string;
   platform: string;
 };
@@ -413,6 +414,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           discount: lazadaPrices.discount || '',
           imageUrl: imageUrl || '',
           url,
+          isActive: false,
           platform: 'Lazada',
           reviews,
           analysis,
@@ -773,6 +775,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           originalPrice: normalPrice,
           discount: discountRate,
           imageUrl,
+          isActive: false,
           url,
           platform: 'Amazon',
           reviews,
@@ -808,6 +811,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
       originalPrice: '',
       discount: '',
       imageUrl: '',
+      isActive: false,
       url,
       platform: '',
     };

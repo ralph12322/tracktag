@@ -1,10 +1,11 @@
-import db  from "./firebaseAdmin";
+import db from "./firebaseAdmin";
 
 export type TrackedProduct = {
     user: string;
     title: string;
     currentPrice: string;
     email: string;
+    isActive: Boolean;
     url: string;
     lastChecked?: string; // optional, helper can auto-set
 };
@@ -50,7 +51,10 @@ export const TrackedProducts = {
      * List all tracked products
      */
     async list(): Promise<TrackedProduct[]> {
-        const snapshot = await db.collection(COLLECTION_NAME).get();
+        const snapshot = await db
+            .collection(COLLECTION_NAME)
+            .where('isActive', '==', true)
+            .get();
         return snapshot.docs.map(doc => doc.data() as TrackedProduct);
     },
 };
