@@ -63,7 +63,7 @@ const analyzeFeedback = (message: string) => {
   } else if (negativeCount > positiveCount) {
     return { isPositive: false, sentiment: sentiment.bad };
   } else {
-    return { isPositive: true, sentiment: sentiment.neut }; // Neutral is treated as acceptable
+    return { isPositive: false, sentiment: sentiment.neut }; // Neutral is treated as acceptable
   }
 };
 
