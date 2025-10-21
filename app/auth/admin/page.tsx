@@ -214,21 +214,21 @@ export default function AdminPage() {
               {
                 title: 'Total Tracked Products',
                 value: totalTracked,
-                gradient: 'from-teal-400 to-cyan-400',
+                gradient: 'from-cyan-400 to-cyan-400',
                 icon: <Package className="w-8 h-8 text-cyan-400" />,
                 accentColor: 'teal'
               },
               {
                 title: 'Active Tracking',
                 value: activeTracking,
-                gradient: 'from-emerald-400 to-teal-400',
+                gradient: 'from-green-400 to-teal-400',
                 icon: <CheckSquare className="w-8 h-8 text-green-400" />  ,
                 accentColor: 'emerald'
               },
               {
                 title: 'Top Platform',
                 value: topPlatform,
-                gradient: 'from-cyan-400 to-blue-400',
+                gradient: 'from-yellow-400 to-blue-400',
                 icon: <Trophy className="w-8 h-8 text-yellow-400" />,
                 accentColor: 'cyan'
               },
