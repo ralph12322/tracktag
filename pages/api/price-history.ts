@@ -11,6 +11,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         await connectToDB();
 
+        // Ensure connection is ready
+        if (mongoose.connection.readyState !== 1) {
+            throw new Error("MongoDB connection not ready");
+        }
+
         const db = mongoose.connection.db;
         if (!db) throw new Error("MongoDB connection is not ready.");
 
@@ -20,10 +25,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: "Title parameter is required" });
         }
 
-        // Case-insensitive title match
+        console.log('Searching for product:', title);
+
+        // Case-insensitive title match with trimmed whitespace
+        const trimmedTitle = title.trim();
         const product = await db
             .collection("allproducts")
-            .findOne({ title: { $regex: new RegExp(`^${title}$`, "i") } });
+            .findOne({ title: { $regex: new RegExp(`^${trimmedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") } });
+
+        console.log('Product found:', product ? 'Yes' : 'No');
 
         if (!product) {
             return res.status(404).json({ error: "Product not found" });
