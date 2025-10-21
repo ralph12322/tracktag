@@ -194,9 +194,9 @@ export default function UserProfile() {
 
   if (error) 
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-950 to-slate-900">
-        <div className="text-center p-8 bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-red-500/20">
-          <h1 className="text-2xl font-bold text-red-400 mb-2">{error}</h1>
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-950 to-slate-900 px-4">
+        <div className="text-center p-6 sm:p-8 bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-red-500/20 max-w-md w-full">
+          <h1 className="text-xl sm:text-2xl font-bold text-red-400 mb-2">{error}</h1>
           <p className="text-slate-300">Redirecting...</p>
         </div>
       </div>
@@ -214,7 +214,7 @@ export default function UserProfile() {
       },
       legend: { 
         bottom: 0,
-        textStyle: { color: '#cbd5e1' }
+        textStyle: { color: '#cbd5e1', fontSize: 11 }
       },
       series: [
         {
@@ -228,7 +228,7 @@ export default function UserProfile() {
             position: 'inside', 
             formatter: '{b}\n{c}',
             color: '#e2e8f0',
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: 'bold'
           },
           labelLine: { show: false },
@@ -244,7 +244,7 @@ export default function UserProfile() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden relative">
-        {/* Enhanced Animated Background - matching homepage */}
+        {/* Enhanced Animated Background */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-40 -left-40 w-80 h-80 bg-teal-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob"></div>
           <div className="absolute top-1/3 -right-32 w-96 h-96 bg-cyan-600 rounded-full mix-blend-screen filter blur-3xl opacity-8 animate-blob animation-delay-2000"></div>
@@ -252,35 +252,35 @@ export default function UserProfile() {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
         </div>
 
-        <div className="relative py-20 px-6">
-          <div className="max-w-6xl mx-auto space-y-8">
+        <div className="relative py-8 sm:py-12 lg:py-20 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
             {/* Profile Header Card */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-3xl p-8 border border-teal-500/30 hover:border-teal-400/60 transition-all duration-300">
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+              <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-teal-500/30 hover:border-teal-400/60 transition-all duration-300">
+                <div className="flex flex-col items-center gap-4 sm:gap-6 lg:gap-8 lg:flex-row lg:items-start">
                   {/* Avatar */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-tr from-teal-500 to-cyan-500 rounded-full blur-xl opacity-50"></div>
-                    <div className="relative w-32 h-32 rounded-full bg-gradient-to-tr from-teal-500 to-cyan-500 flex items-center justify-center text-white font-black text-5xl shadow-2xl shadow-teal-500/30 border-4 border-slate-900/50">
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full bg-gradient-to-tr from-teal-500 to-cyan-500 flex items-center justify-center text-white font-black text-4xl sm:text-5xl shadow-2xl shadow-teal-500/30 border-4 border-slate-900/50">
                       {user.username.charAt(0).toUpperCase()}
                     </div>
                   </div>
 
                   {/* User Info */}
-                  <div className="flex-1 text-center md:text-left">
-                    <div className="space-y-3">
-                      <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
+                  <div className="flex-1 text-center lg:text-left w-full">
+                    <div className="space-y-2 sm:space-y-3">
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent break-words">
                         {user.username}
                       </h1>
-                      <p className="text-lg text-slate-300 font-light">{user.email}</p>
+                      <p className="text-base sm:text-lg text-slate-300 font-light break-all">{user.email}</p>
                       {user.role && (
-                        <div className="inline-flex items-center gap-2 bg-slate-900/60 backdrop-blur-xl px-4 py-2 rounded-full border border-teal-500/30">
+                        <div className="inline-flex items-center gap-2 bg-slate-900/60 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-teal-500/30">
                           <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
                           </span>
-                          <span className="text-sm font-semibold text-teal-300">
+                          <span className="text-xs sm:text-sm font-semibold text-teal-300">
                             {user.role.toUpperCase()}
                           </span>
                         </div>
@@ -289,10 +289,10 @@ export default function UserProfile() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col gap-3 w-full md:w-auto">
+                  <div className="flex flex-col gap-2 sm:gap-3 w-full lg:w-auto">
                     <button
                       onClick={() => setShowFeedback(true)}
-                      className="group relative px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl font-semibold shadow-lg hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300 transform hover:scale-105"
+                      className="group relative px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300 transform hover:scale-105"
                     >
                       <span className="relative z-10">Give Feedback</span>
                       <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -300,7 +300,7 @@ export default function UserProfile() {
                     
                     <button
                       onClick={() => setShowConfirm(true)}
-                      className="group relative px-6 py-3 bg-slate-700/50 backdrop-blur-xl rounded-xl font-semibold border border-red-500/30 hover:border-red-500/60 shadow-lg hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-105"
+                      className="group relative px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-700/50 backdrop-blur-xl rounded-xl font-semibold text-sm sm:text-base border border-red-500/30 hover:border-red-500/60 shadow-lg hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-105"
                     >
                       <span className="relative z-10 text-red-400">Logout</span>
                     </button>
@@ -312,19 +312,19 @@ export default function UserProfile() {
             {/* Stats Card */}
             {stats && (
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
-                <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-3xl p-8 border border-teal-500/30">
-                  <div className="flex items-center gap-3 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-teal-600 to-cyan-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+                <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-teal-500/30">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <div className="flex gap-2">
-                      <span className="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></span>
-                      <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse animation-delay-150"></span>
+                      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 animate-pulse"></span>
+                      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse animation-delay-150"></span>
                     </div>
-                    <h2 className="text-2xl font-black bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
+                    <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
                       Tracking Overview
                     </h2>
                   </div>
-                  <div className="bg-slate-900/40 rounded-2xl p-6 border border-teal-500/20">
-                    <ReactECharts option={chartOption} style={{ height: 280 }} />
+                  <div className="bg-slate-900/40 rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-teal-500/20">
+                    <ReactECharts option={chartOption} style={{ height: 240 }} className="sm:!h-[280px]" />
                   </div>
                 </div>
               </div>
@@ -332,28 +332,102 @@ export default function UserProfile() {
 
             {/* Products Table Card */}
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
-              <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-3xl p-8 border border-teal-500/30">
-                <div className="flex items-center gap-3 mb-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+              <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-teal-500/30">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <div className="flex gap-2">
-                    <span className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
-                    <span className="w-3 h-3 rounded-full bg-teal-400 animate-pulse animation-delay-150"></span>
+                    <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 animate-pulse animation-delay-150"></span>
                   </div>
-                  <h2 className="text-2xl font-black bg-gradient-to-r from-cyan-300 to-teal-300 bg-clip-text text-transparent">
+                  <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-cyan-300 to-teal-300 bg-clip-text text-transparent">
                     Your Tracked Products
                   </h2>
                 </div>
 
                 {products.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/40 border border-teal-500/30 mb-4">
-                      <span className="text-4xl">📦</span>
+                  <div className="text-center py-12 sm:py-16">
+                    <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-700/40 border border-teal-500/30 mb-4">
+                      <span className="text-3xl sm:text-4xl">📦</span>
                     </div>
-                    <p className="text-slate-400 text-lg">No products tracked yet.</p>
+                    <p className="text-slate-400 text-base sm:text-lg">No products tracked yet.</p>
                   </div>
                 ) : (
                   <>
-                    <div className="overflow-x-auto rounded-2xl border border-slate-700/50">
+                    {/* Mobile Card View */}
+                    <div className="block lg:hidden space-y-4">
+                      {visibleProducts.map((product, idx) => (
+                        <div 
+                          key={product._id}
+                          className="bg-slate-800/30 backdrop-blur-xl rounded-xl p-4 border border-slate-700/50 hover:border-teal-500/30 transition-all duration-300"
+                          style={{ animationDelay: `${idx * 50}ms` }}
+                        >
+                          <a
+                            href={product.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-200 hover:text-teal-300 transition-colors font-medium block mb-3 line-clamp-2"
+                            title={product.title}
+                          >
+                            {product.title}
+                          </a>
+                          
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <div className="text-xs text-slate-400 mb-1">Current Price</div>
+                              <div className="font-bold text-lg bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                                {product.currentPrice}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs text-slate-400 mb-1">Original Price</div>
+                              <div className="text-slate-400 line-through">
+                                {product.originalPrice}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-3">
+                            <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${
+                              product.isActive 
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50' 
+                                : 'bg-slate-500/20 text-slate-400 border-slate-500/50'
+                            }`}>
+                              <span className={`w-2 h-2 rounded-full ${
+                                product.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
+                              }`}></span>
+                              {product.isActive ? 'Active' : 'Inactive'}
+                            </span>
+
+                            <button
+                              onClick={() => handleToggleActive(product._id, product.isActive)}
+                              disabled={togglingId === product._id}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 flex-shrink-0 ${
+                                product.isActive
+                                  ? 'bg-red-500/20 text-red-300 border border-red-500/50 hover:bg-red-500/30 hover:border-red-400'
+                                  : 'bg-teal-500/20 text-teal-300 border border-teal-500/50 hover:bg-teal-500/30 hover:border-teal-400'
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              {togglingId === product._id ? (
+                                <span className="flex items-center gap-2">
+                                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Loading...
+                                </span>
+                              ) : product.isActive ? (
+                                "Disable"
+                              ) : (
+                                'Enable'
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto rounded-2xl border border-slate-700/50">
                       <table className="min-w-full divide-y divide-slate-700/50">
                         <thead className="bg-slate-900/60 backdrop-blur-xl">
                           <tr>
@@ -444,11 +518,11 @@ export default function UserProfile() {
                     </div>
 
                     {(visibleCount < products.length || visibleCount > 10) && (
-                      <div className="mt-6 flex justify-center gap-4">
+                      <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                         {visibleCount < products.length && (
                           <button
                             onClick={handleShowMore}
-                            className="px-6 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-teal-500/20 transform hover:scale-105"
+                            className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-teal-500/20 transform hover:scale-105"
                           >
                             Show More Products
                           </button>
@@ -456,7 +530,7 @@ export default function UserProfile() {
                         {visibleCount > 10 && (
                           <button
                             onClick={handleShowLess}
-                            className="px-6 py-3 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold transition-all duration-300 border border-slate-600/50 hover:border-teal-500/50"
+                            className="px-5 sm:px-6 py-2.5 sm:py-3 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 border border-slate-600/50 hover:border-teal-500/50"
                           >
                             Show Less
                           </button>
@@ -472,24 +546,24 @@ export default function UserProfile() {
 
         {/* Logout Modal */}
         {showConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 rounded-3xl blur-2xl opacity-20"></div>
-              <div className="relative bg-slate-800/95 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl w-96 border border-red-500/30">
-                <h3 className="text-2xl font-black text-slate-100 mb-3 bg-gradient-to-r from-red-300 to-red-400 bg-clip-text text-transparent">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+            <div className="relative group w-full max-w-md">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 rounded-2xl sm:rounded-3xl blur-2xl opacity-20"></div>
+              <div className="relative bg-slate-800/95 backdrop-blur-2xl p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl border border-red-500/30">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-100 mb-2 sm:mb-3 bg-gradient-to-r from-red-300 to-red-400 bg-clip-text text-transparent">
                   Confirm Logout
                 </h3>
-                <p className="text-slate-300 mb-6 font-light">Are you sure you want to log out of your account?</p>
-                <div className="flex justify-end gap-3">
+                <p className="text-sm sm:text-base text-slate-300 mb-4 sm:mb-6 font-light">Are you sure you want to log out of your account?</p>
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                   <button
                     onClick={() => setShowConfirm(false)}
-                    className="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold transition-all duration-300 border border-slate-600/50 hover:border-slate-500"
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 border border-slate-600/50 hover:border-slate-500"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-red-500/30 transform hover:scale-105"
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-red-500/30 transform hover:scale-105"
                   >
                     Logout
                   </button>
@@ -501,29 +575,29 @@ export default function UserProfile() {
 
         {/* Feedback Modal */}
         {showFeedback && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-3xl blur-2xl opacity-20"></div>
-              <div className="relative bg-slate-800/95 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl max-w-md w-full border border-teal-500/30">
-                <h3 className="text-2xl font-black mb-6 bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+            <div className="relative group w-full max-w-md">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-20"></div>
+              <div className="relative bg-slate-800/95 backdrop-blur-2xl p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl border border-teal-500/30">
+                <h3 className="text-xl sm:text-2xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent">
                   Share Your Feedback
                 </h3>
                 <textarea
-                  className="w-full bg-slate-900/50 border border-teal-500/30 rounded-2xl p-4 mb-6 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 text-slate-100 placeholder-slate-500 transition-all backdrop-blur-xl"
+                  className="w-full bg-slate-900/50 border border-teal-500/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 h-28 sm:h-32 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 text-sm sm:text-base text-slate-100 placeholder-slate-500 transition-all backdrop-blur-xl"
                   placeholder="Tell us what you think..."
                   value={feedback?.message || ''}
                   onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
                 />
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                   <button
                     onClick={() => setShowFeedback(false)}
-                    className="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold transition-all duration-300 border border-slate-600/50 hover:border-slate-500"
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-700/50 hover:bg-slate-600/50 backdrop-blur-xl text-slate-100 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 border border-slate-600/50 hover:border-slate-500"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleFeedbackSubmit}
-                    className="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-teal-500/30 transform hover:scale-105"
+                    className="px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-teal-500/30 transform hover:scale-105"
                   >
                     Submit Feedback
                   </button>
@@ -552,6 +626,12 @@ export default function UserProfile() {
         }
         .animation-delay-150 {
           animation-delay: 150ms;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </>
