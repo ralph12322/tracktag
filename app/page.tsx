@@ -80,7 +80,7 @@ const Home = () => {
       </div>
     );
 
-  if (error) 
+  if (error)
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-950 to-slate-900">
         <div className="text-center p-8 bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-red-500/20">
@@ -98,7 +98,7 @@ const Home = () => {
         <div className="absolute -top-40 -left-40 w-80 h-80 bg-teal-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-blob"></div>
         <div className="absolute top-1/3 -right-32 w-96 h-96 bg-cyan-600 rounded-full mix-blend-screen filter blur-3xl opacity-8 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-32 left-1/2 w-80 h-80 bg-slate-700 rounded-full mix-blend-screen filter blur-3xl opacity-8 animate-blob animation-delay-4000"></div>
-        
+
         {/* Subtle grid effect */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20"></div>
       </div>
@@ -122,7 +122,7 @@ const Home = () => {
             />
           </div>
         </Link>
-        
+
         <Link
           href="https://www.lazada.com.ph"
           target="_blank"
@@ -178,9 +178,19 @@ const Home = () => {
             </div>
 
             {/* Subheading */}
-            <p className="text-lg text-slate-300 max-w-2xl leading-relaxed font-light">
-              Transform scattered prices and reviews into meaningful insights. Make smarter decisions and ensure the best deals are never missed.
-            </p>
+            <div className="max-w-2xl">
+              <p className="text-lg text-slate-300 leading-relaxed font-light mb-4">
+                Transform scattered prices and reviews into meaningful insights. Make smarter decisions and ensure the best deals are never missed.
+              </p>
+              <div className="flex items-start gap-2 p-3 bg-slate-700/30 border border-teal-500/30 rounded-lg">
+                <svg className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  <span className="font-medium text-slate-300">Note:</span> Our database currently contains historical data for apparel products only. Items beyond this category are not yet tracked.
+                </p>
+              </div>
+            </div>
 
             {/* Searchbar */}
             <div className="pt-4">
@@ -243,7 +253,7 @@ const Home = () => {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-teal-600/20 via-transparent to-cyan-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                  
+
                   <div className="relative p-5 flex flex-col h-full">
                     {/* Image Container */}
                     <div className="relative mb-4 bg-slate-700/40 rounded-xl p-4 overflow-hidden border border-slate-600/50 group-hover:border-teal-500/30 transition-colors duration-300">
@@ -255,7 +265,7 @@ const Home = () => {
                           (e.target as HTMLImageElement).src = "/images/placeholder-apparel.png";
                         }}
                       />
-                      
+
                       {/* Platform Badge */}
                       <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-xl px-3 py-1 rounded-lg shadow-lg border border-slate-600/50">
                         <span className="text-xs font-semibold text-slate-200">{product.platform}</span>
@@ -281,7 +291,7 @@ const Home = () => {
                           {product.currentPrice || "See Price"}
                         </p>
                       </div>
-                      
+
                       {product.originalPrice && product.originalPrice !== product.currentPrice && (
                         <p className="text-sm text-slate-500 line-through">
                           {product.originalPrice}
