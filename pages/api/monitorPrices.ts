@@ -31,7 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const alerts: any[] = [];
 
         for (const tracked of trackedList) {
-            const { docId, user, title, currentPrice, email, url } = tracked;
+            const { user, title, currentPrice, email, url } = tracked;
+            const docId = (tracked as any).docId ?? (tracked as any).id ?? (tracked as any)._id ?? '';
             
             console.log(`Processing tracked product - docId: ${docId}, title: ${title}`);
 

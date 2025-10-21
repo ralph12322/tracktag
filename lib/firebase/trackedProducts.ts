@@ -10,6 +10,10 @@ export type TrackedProduct = {
     lastChecked?: string; // optional, helper can auto-set
 };
 
+export type TrackedProductWithId = TrackedProduct & {
+    docId: string; // Add document ID to the type
+};
+
 const COLLECTION_NAME = "trackedProducts";
 
 export const TrackedProducts = {
@@ -17,15 +21,22 @@ export const TrackedProducts = {
      * Add or update a tracked product for a user/document
      */
     async set(docId: string, product: TrackedProduct) {
-        const docRef = db.collection(COLLECTION_NAME).doc(docId);
+        try {
+            const docRef = db.collection(COLLECTION_NAME).doc(docId);
 
-        const dataToSave: TrackedProduct = {
-            ...product,
-            lastChecked: new Date().toISOString(),
-        };
+            const dataToSave: TrackedProduct = {
+                ...product,
+                lastChecked: new Date().toISOString(),
+            };
 
-        await docRef.set(dataToSave, { merge: true });
-        return dataToSave;
+            console.log(`Updating Firestore doc ${docId} with price:`, dataToSave.currentPrice);
+            await docRef.set(dataToSave, { merge: true });
+            console.log(`✅ Firestore doc ${docId} updated successfully`);
+            return dataToSave;
+        } catch (error) {
+            console.error(`❌ Failed to update Firestore doc ${docId}:`, error);
+            throw error;
+        }
     },
 
     /**
@@ -48,13 +59,30 @@ export const TrackedProducts = {
     },
 
     /**
-     * List all tracked products
+     * List all tracked products (with document IDs)
      */
-    async list(): Promise<TrackedProduct[]> {
-        const snapshot = await db
-            .collection(COLLECTION_NAME)
-            .where('isActive', '==', true)
-            .get();
-        return snapshot.docs.map(doc => doc.data() as TrackedProduct);
+    async list(): Promise<TrackedProductWithId[]> {
+        try {
+            const snapshot = await db
+                .collection(COLLECTION_NAME)
+                .where('isActive', '==', true)
+                .get();
+            
+            console.log(`Found ${snapshot.docs.length} tracked products`);
+            
+            const results = snapshot.docs.map(doc => {
+                const data = doc.data() as TrackedProduct;
+                console.log(`Document ID: "${doc.id}", Title: "${data.title}"`);
+                return {
+                    ...data,
+                    docId: doc.id
+                };
+            });
+            
+            return results;
+        } catch (error) {
+            console.error('Error listing tracked products:', error);
+            throw error;
+        }
     },
 };
