@@ -6,28 +6,85 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const router = useRouter(); 
+  const [otp, setOtp] = useState('');
+  const [tempUserId, setTempUserId] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password }),
-    });
+      const data = await res.json();
+      console.log('Signup response:', data);
 
-    const data = await res.json();
+      if (res.ok) {
+        // Store temporary user ID and move to OTP step
+        console.log(data)
+        setTempUserId(data._id);
+        setStep('otp');
+        toast.success('OTP sent! Check your email.');
+      } else {
+        toast.error(`${data.error}`);
+      }
+    } catch (error) {
+      console.error('Signup failed:', error);
+      toast.error('Signup failed. Please try again.');
+    }
+  };
 
-    if (res.ok) {
-      toast.success('Signup successful!');
-      router.push('/auth/login');
-    } else {
-      toast.error(`${data.error}`);
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: email,  // Send email for verification
+          otp,
+          type: 'signup'
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success('Account verified! Please log in.');
+        router.push('/auth/login');
+      } else {
+        toast.error(`${data.error}`);
+      }
+    } catch (error) {
+      console.error('OTP verification failed:', error);
+      toast.error('OTP verification failed. Please try again.');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const res = await fetch('/api/auth/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: tempUserId, type: 'signup' }),
+      });
+
+      if (res.ok) {
+        toast.success('OTP resent successfully!');
+      } else {
+        const data = await res.json();
+        toast.error(`${data.error}`);
+      }
+    } catch (error) {
+      console.error('Resend OTP failed:', error);
+      toast.error('Failed to resend OTP.');
     }
   };
 
@@ -58,67 +115,118 @@ export default function SignupPage() {
           {/* Title */}
           <div className="mb-8">
             <h2 className="text-4xl font-black mb-2 bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-              Sign Up for TrackTag
+              {step === 'credentials' ? 'Sign Up for TrackTag' : 'Verify Your Email'}
             </h2>
-            <p className="text-slate-300 text-sm font-light">
-              Already have an account?{' '}
-              <Link 
-                href="/auth/login" 
-                className="font-semibold text-teal-400 hover:text-teal-300 transition-colors duration-300 underline decoration-teal-400/30 hover:decoration-teal-300"
-              >
-                Log in
-              </Link>
-            </p>
+            {step === 'credentials' ? (
+              <p className="text-slate-300 text-sm font-light">
+                Already have an account?{' '}
+                <Link 
+                  href="/auth/login" 
+                  className="font-semibold text-teal-400 hover:text-teal-300 transition-colors duration-300 underline decoration-teal-400/30 hover:decoration-teal-300"
+                >
+                  Log in
+                </Link>
+              </p>
+            ) : (
+              <p className="text-slate-300 text-sm font-light">
+                Enter the 6-digit code sent to your email
+              </p>
+            )}
           </div>
 
-          {/* Form */}
-          <form className="space-y-5" onSubmit={handleSignup}>
-            <div className="space-y-4">
+          {/* Credentials Form */}
+          {step === 'credentials' && (
+            <form className="space-y-5" onSubmit={handleSignup}>
+              <div className="space-y-4">
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="relative group/btn w-full flex justify-center py-3 px-4 rounded-xl font-semibold text-slate-900 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-slate-900 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+              >
+                <span className="relative z-10">Continue</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-xl blur-lg opacity-0 group-hover/btn:opacity-50 transition-opacity duration-300"></div>
+              </button>
+            </form>
+          )}
+
+          {/* OTP Form */}
+          {step === 'otp' && (
+            <form className="space-y-5" onSubmit={handleVerifyOtp}>
               <div className="relative group/input">
                 <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
                 <input
                   type="text"
                   required
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  maxLength={6}
+                  className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 text-center text-2xl tracking-widest font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
                 />
               </div>
 
-              <div className="relative group/input">
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
-                <input
-                  type="email"
-                  required
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
-                />
-              </div>
+              <button
+                type="submit"
+                className="relative group/btn w-full flex justify-center py-3 px-4 rounded-xl font-semibold text-slate-900 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-slate-900 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+              >
+                <span className="relative z-10">Verify & Create Account</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-xl blur-lg opacity-0 group-hover/btn:opacity-50 transition-opacity duration-300"></div>
+              </button>
 
-              <div className="relative group/input">
-                <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
-                <input
-                  type="password"
-                  required
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
-                />
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => setStep('credentials')}
+                  className="text-slate-400 hover:text-teal-400 transition-colors duration-300"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-teal-400 hover:text-teal-300 transition-colors duration-300 font-semibold"
+                >
+                  Resend OTP
+                </button>
               </div>
-            </div>
-
-            <button
-              type="submit"
-              className="relative group/btn w-full flex justify-center py-3 px-4 rounded-xl font-semibold text-slate-900 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-slate-900 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
-            >
-              <span className="relative z-10">Sign Up</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-xl blur-lg opacity-0 group-hover/btn:opacity-50 transition-opacity duration-300"></div>
-            </button>
-          </form>
+            </form>
+          )}
 
           {/* Decorative Line */}
           <div className="mt-8 flex items-center justify-center">

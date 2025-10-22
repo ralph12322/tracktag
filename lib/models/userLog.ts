@@ -3,7 +3,18 @@ import mongoose from 'mongoose';
 const userLogSchema = new mongoose.Schema({
   email: { type: String, required: true },
   username: { type: String, required: true },
-  action: { type: String, enum: ['LOGIN', 'SIGNUP'], required: true },
+  action: {
+    type: String,
+    enum: [
+      "SIGNUP",
+      "SIGNUP_VERIFIED",
+      "LOGIN",
+      "LOGIN_OTP_INVALID",
+      "LOGOUT",
+    ],
+    required: true,
+  },
+
   status: { type: String, enum: ['SUCCESS', 'FAILED'], required: true },
   createdAt: { type: Date, default: Date.now }
 });
