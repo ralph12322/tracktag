@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import getTrendingProducts from '@/lib/utils/trending';
 import FeedbackCarousel from '@/components/FeedbackCarousel';
+import FloatingNavigators from '@/components/FloatingNavigators';
 
 type Product = {
   name: string;
@@ -104,43 +105,7 @@ const Home = () => {
       </div>
 
       {/* Floating Platform Links */}
-      <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
-        <Link
-          href="https://www.amazon.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-          <div className="relative bg-slate-800/60 backdrop-blur-xl p-3 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-orange-500/20 transform hover:scale-110 transition-all duration-300 border border-slate-700/50 hover:border-orange-500/50">
-            <Image
-              src="https://1000logos.net/wp-content/uploads/2016/10/Amazon-logo-meaning.jpg"
-              alt="Amazon"
-              width={60}
-              height={60}
-              className="object-contain brightness-150"
-            />
-          </div>
-        </Link>
-
-        <Link
-          href="https://www.lazada.com.ph"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
-          <div className="relative bg-slate-800/60 backdrop-blur-xl p-3 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-teal-500/20 transform hover:scale-110 transition-all duration-300 border border-slate-700/50 hover:border-teal-500/50">
-            <Image
-              src="https://toppng.com/uploads/preview/1-1-117399190015vok5wuz1m.webp"
-              alt="Lazada"
-              width={60}
-              height={60}
-              className="object-contain brightness-150"
-            />
-          </div>
-        </Link>
-      </div>
+      <FloatingNavigators />
 
       {/* Hero Section */}
       <section className="relative px-6 md:px-20 py-32 overflow-hidden">
