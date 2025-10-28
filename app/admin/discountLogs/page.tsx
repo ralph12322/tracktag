@@ -82,8 +82,8 @@ export default function DiscountLogsPage() {
       </div>
 
       <div className="relative flex flex-col lg:flex-row gap-0 lg:gap-6 p-0 lg:p-6">
-       
-        <AdminSideBar/>
+
+        <AdminSideBar />
 
         {/* Overlay for mobile */}
         {sidebarOpen && (
@@ -170,7 +170,7 @@ export default function DiscountLogsPage() {
                           <td className="p-4 font-medium text-slate-200 text-sm">{log.platform}</td>
                           <td className="p-4 text-emerald-300 font-semibold text-sm">{log.discountPercent}%</td>
                           <td className="p-4 text-slate-400 text-sm">
-                            ₱{log.previousPrice.toFixed(2)} → ₱{log.currentPrice.toFixed(2)}
+                            {log.platform.toLowerCase() === 'lazada' ? '₱' : '$'}{log.previousPrice.toFixed(2)} → {log.platform.toLowerCase() === 'lazada' ? '₱' : '$'}{log.currentPrice.toFixed(2)}
                           </td>
                         </tr>
                       ))
@@ -213,9 +213,9 @@ export default function DiscountLogsPage() {
                     <div className="border-t border-slate-700/30 pt-3">
                       <p className="text-xs text-slate-400 mb-2">Price Drop</p>
                       <p className="text-sm text-slate-300">
-                        <span className="text-slate-400">₱{log.previousPrice.toFixed(2)}</span>
+                        <span className="text-slate-400">{log.platform.toLowerCase() === 'lazada' ? '₱' : '$'}{log.previousPrice.toFixed(2)}</span>
                         <span className="text-slate-500 mx-2">→</span>
-                        <span className="text-emerald-300 font-semibold">₱{log.currentPrice.toFixed(2)}</span>
+                        <span className="text-emerald-300 font-semibold">{log.platform.toLowerCase() === 'lazada' ? '₱' : '$'}{log.currentPrice.toFixed(2)}</span>
                       </p>
                     </div>
                   </div>
