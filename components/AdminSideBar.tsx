@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, User, List, Tag, MessageSquare, Menu, X } from 'lucide-react';
+import { LayoutDashboard, User, Users, List, Tag, MessageSquare, Menu, X } from 'lucide-react';
 
 export default function AdminSideBar() {
   const pathname = usePathname();
@@ -11,10 +11,13 @@ export default function AdminSideBar() {
 
   const links = [
     { href: '/auth/admin', label: 'Home', icon: <LayoutDashboard size={18} /> },
+    { href: '/admin/users', label: 'Users', icon: <Users size={18} /> },
     { href: '/admin/userLogs', label: 'User Logs', icon: <User size={18} /> },
+    { href: '/admin/userFeedback', label: 'User Feedback', icon: <MessageSquare size={18} /> },
     { href: '/admin/productTrackingLogs', label: 'Product Tracking Logs', icon: <List size={18} /> },
     { href: '/admin/discountLogs', label: 'Discount Alert Logs', icon: <Tag size={18} /> },
-    { href: '/admin/userFeedback', label: 'User Feedback', icon: <MessageSquare size={18} /> },
+
+
   ];
 
   // Close sidebar when resizing to desktop
@@ -73,8 +76,8 @@ export default function AdminSideBar() {
                     href={href}
                     onClick={() => setIsOpen(false)}
                     className={`group/link relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                        ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 shadow-lg shadow-teal-500/10'
-                        : 'text-slate-300 hover:text-teal-300 hover:bg-slate-700/30'
+                      ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 shadow-lg shadow-teal-500/10'
+                      : 'text-slate-300 hover:text-teal-300 hover:bg-slate-700/30'
                       }`}
                   >
                     {/* Active indicator */}
