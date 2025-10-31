@@ -39,9 +39,6 @@ const OTPSchema = new Schema<IOTP>({
 
 // Compound index for efficient queries
 OTPSchema.index({ userId: 1, type: 1 });
-OTPSchema.index({ expiresAt: 1 }); // For cleanup queries
-
-// Auto-delete expired OTPs (TTL index)
 // MongoDB will automatically delete documents where expiresAt is in the past
 OTPSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
