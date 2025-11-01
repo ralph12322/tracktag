@@ -160,16 +160,16 @@ const VERDICTS = {
 
 function analyzeSentiment(texts: string[]) {
   if (texts.length === 0) return VERDICTS.BAD; // Handle empty case
-  
+
   const totalScore = texts.reduce((sum, t) => sum + sentiment.analyze(t).score, 0);
   const averageScore = totalScore / texts.length; // KEY FIX
-  
+
   const verdict = averageScore >= 1.5  // Adjusted thresholds
     ? VERDICTS.GOOD
     : averageScore >= 0.5
       ? VERDICTS.OKAY
       : VERDICTS.BAD;
-  
+
   return verdict;
 }
 
@@ -438,8 +438,21 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
     // --------------- Amazon Logic (Enhanced with Reviews) ---------------
     if (url.includes('amazon.')) {
       try {
+        // Force USD currency by setting cookies and visiting currency preference page
+        await page.goto('https://www.amazon.com/', { waitUntil: 'networkidle2', timeout: 30000 });
+
+        // Set currency preference cookie
+        await page.setCookie({
+          name: 'i18n-prefs',
+          value: 'USD',
+          domain: '.amazon.com'
+        });
+
+        await delay(1000);
+
+        // Now navigate to the actual product page
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 180000 });
-        await delay(5000); // Increased delay for dynamic content
+        await delay(5000);
 
         // Extract product title
         const title = await page.evaluate(() => {
@@ -457,40 +470,66 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         let { currentPrice, discountRate, normalPrice } = await page.evaluate(() => {
           let currentPrice = '';
 
-          // Method 1: Try multiple selectors for current price
+          // Method 1: Try multiple selectors for current price (prioritized order)
           const priceSelectors = [
-            '.a-price .a-offscreen',
-            '#priceblock_ourprice',
-            '#priceblock_dealprice',
-            '.a-price-whole',
-            '#corePriceDisplay_desktop_feature_div .a-price .a-offscreen',
+            // Most specific selectors first
             '.priceToPay .a-offscreen',
             'span.a-price[data-a-size="xl"] .a-offscreen',
-            '.a-price.aok-align-center .a-offscreen',
+            '.reinventPricePriceToPayMargin .a-offscreen',
+            '#corePriceDisplay_desktop_feature_div .a-price .a-offscreen',
             '#corePrice_feature_div .a-price .a-offscreen',
+            '#priceblock_ourprice',
+            '#priceblock_dealprice',
+            '.a-price.aok-align-center .a-offscreen',
           ];
+
+          const foundPrices = new Set();
 
           for (const selector of priceSelectors) {
             const el = document.querySelector(selector);
             if (el?.textContent?.trim()) {
-              currentPrice = el.textContent.trim();
-              break;
-            }
-          }
-
-          // Method 2: Try price from aria-label
-          if (!currentPrice) {
-            const priceSpans = Array.from(document.querySelectorAll('span.a-price'));
-            for (const span of priceSpans) {
-              const offscreen = span.querySelector('.a-offscreen');
-              if (offscreen?.textContent?.trim()) {
-                currentPrice = offscreen.textContent.trim();
+              const price = el.textContent.trim();
+              // Skip if we've seen this exact price before (avoids duplicates)
+              if (!foundPrices.has(price)) {
+                foundPrices.add(price);
+                currentPrice = price;
                 break;
               }
             }
           }
 
-          // Method 3: Regex pattern in body text
+          // Method 2: Try visible price components if offscreen not found
+          if (!currentPrice) {
+            const priceWhole = document.querySelector('.priceToPay .a-price-whole');
+            const priceFraction = document.querySelector('.priceToPay .a-price-fraction');
+            const priceSymbol = document.querySelector('.priceToPay .a-price-symbol');
+
+            if (priceWhole && priceFraction) {
+              const symbol = priceSymbol?.textContent?.trim() || '$';
+              const whole = priceWhole.textContent?.replace('.', '').trim() || '';
+              const fraction = priceFraction.textContent?.trim() || '';
+              if (whole && fraction) {
+                currentPrice = `${symbol}${whole}.${fraction}`;
+              }
+            }
+          }
+
+          // Method 3: Try any a-price with offscreen as last resort
+          if (!currentPrice) {
+            const priceSpans = Array.from(document.querySelectorAll('span.a-price'));
+            for (const span of priceSpans) {
+              const offscreen = span.querySelector('.a-offscreen');
+              if (offscreen?.textContent?.trim()) {
+                const price = offscreen.textContent.trim();
+                if (price && price.includes('$') && !foundPrices.has(price)) {
+                  currentPrice = price;
+                  break;
+                }
+              }
+            }
+          }
+
+          // Method 4: Regex pattern in body text as absolute fallback
           if (!currentPrice) {
             const pricePattern = /\$\d+\.\d{2}/;
             const bodyText = document.body.innerText;
@@ -579,6 +618,16 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           console.error('Title found:', title);
           await browser.close();
           throw new Error('Unable to extract product price from Amazon page. The page structure may have changed or the product is unavailable.');
+        }
+
+        // Normalize currency (handle PHP, USD, etc)
+        if (currentPrice) {
+          currentPrice = currentPrice.trim();
+          // If it's PHP, you might want to convert or flag it
+          if (currentPrice.includes('PHP')) {
+            console.warn('⚠️ Price detected in PHP, not USD:', currentPrice);
+            // Optional: You could convert PHP to USD or skip this product
+          }
         }
 
         console.log('✅ Amazon Prices extracted:', { currentPrice, discountRate, normalPrice });
