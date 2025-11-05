@@ -31,7 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const trimmedTitle = title.trim();
         const product = await db
             .collection("allproducts")
-            .findOne({ title: { $regex: new RegExp(`^${trimmedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") } });
+            .findOne({
+                title: {
+                    $regex: new RegExp(`^${trimmedTitle.substring(0, 100).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i")
+                }
+            });
 
         console.log('Product found:', product ? 'Yes' : 'No');
 
@@ -53,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Get price history and format it
         const priceHistory = product.priceHistory || [];
-        
+
         if (priceHistory.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -63,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 originalPrice: cleanPrice(product.originalPrice)
             });
         }
-        
+
         // Format price history data for the chart
         const formattedHistory = priceHistory.map((entry: any, index: number) => {
             // Handle different date formats
