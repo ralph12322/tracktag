@@ -14,7 +14,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await connectToDB();
     const { username, password } = req.body;
-    console.log(req.body)
 
     // 1. Validate input
     if (!username || !password) {
