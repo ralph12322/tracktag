@@ -5,11 +5,11 @@ import { Carousel } from "react-responsive-carousel";
 import Image from "next/image";
 
 const heroImages = [
-  { imgUrl: "https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?cs=srgb&dl=pexels-madebymath-90946.jpg&fm=jpg", alt: "smartwatch" },
-  { imgUrl: "https://m.media-amazon.com/images/I/71f5Eu5lJSL._AC_SL1500_.jpg", alt: "bag" },
-  { imgUrl: "https://www.fishingstation.com.au/cdn/shop/files/Yeti_Rambler_36oz_1L_Reuseable_Bottle_with_Chug_Cap_-_Lowcountry_Peach_1500x.webp?v=1727931148", alt: "bottle" },
-  { imgUrl: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D", alt: "air fryer" },
-  { imgUrl: "/assets/images/hero-5.svg", alt: "chair" },
+  { imgUrl: "https://i.pinimg.com/736x/c4/95/3e/c4953e3771f301e24511610e2b595cf6.jpg", alt: "shirt" },
+  { imgUrl: "https://i.pinimg.com/1200x/2e/c3/9f/2ec39f39eda5ea7089ff9ce874fd329d.jpg", alt: "bag" },
+  { imgUrl: "https://i.pinimg.com/1200x/c4/19/8c/c4198cec9fb58fc37631e8128cf7af37.jpg", alt: "bottle" },
+  { imgUrl: "https://i.pinimg.com/1200x/f7/38/e8/f738e817dd10e837793141266e97b940.jpg", alt: "air fryer" },
+  { imgUrl: "https://i.pinimg.com/1200x/e6/49/3b/e6493b4a8530ff1ad894852c31fbade0.jpg", alt: "chair" },
 ];
 
 const HeroCarousel = () => {

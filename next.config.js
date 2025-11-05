@@ -16,7 +16,8 @@ const nextConfig = {
       'cf.shopee.ph',
       'deo.shopeemobile.com',
       '1000logos.net',
-      'ph-live.slatic.net',]
+      'ph-live.slatic.net',
+    'i.pinimg.com']
   },
 };
 
