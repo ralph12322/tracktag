@@ -11,6 +11,8 @@ const userLogSchema = new mongoose.Schema({
       "LOGIN",
       "LOGIN_OTP_INVALID",
       "LOGOUT",
+      "PASSWORD_RESET_REQUESTED",
+      "PASSWORD_RESET",
     ],
     required: true,
   },

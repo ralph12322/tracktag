@@ -1,16 +1,15 @@
-// pages/api/auth/resend-otp.ts
+// pages/api/auth/forgot-password.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../start';
 import { User } from '@/lib/models/user';
 import { OTP } from '@/lib/models/otp';
 import { UserLog } from '@/lib/models/userLog';
-import { generateOTP, sendOTPEmail, sendHtmlEmail } from '@/lib/alerts/gmail';
+import { generateOTP, sendHtmlEmail } from '@/lib/alerts/gmail';
 
 type ResponseData = {
   message?: string;
   error?: string;
-  success?: boolean;
-  devOTP?: string;
+  userId?: string;
 };
 
 export default async function handler(
@@ -22,136 +21,121 @@ export default async function handler(
   }
 
   try {
+    // Connect to database
     await connectToDB();
 
-    const { userId, type } = req.body;
+    const { email } = req.body;
 
-    // Validate required fields
-    if (!userId || !type) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Validate type
-    if (!['login', 'signup', 'password-reset'].includes(type)) {
-      return res.status(400).json({ error: 'Invalid OTP type' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Get user
-    const user = await User.findById(userId);
+    // Check if user exists with this email
+    const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      // For security, don't reveal if email exists or not
+      return res.status(200).json({ 
+        message: 'If an account exists with this email, you will receive a password reset code.',
+        userId: ''
+      });
     }
 
     // Check rate limiting - prevent spam (1 minute cooldown)
     const recentOTP = await OTP.findOne({
       userId: user._id,
-      type,
+      type: 'password-reset',
       createdAt: { $gt: new Date(Date.now() - 60000) },
     });
 
     if (recentOTP) {
-      const timeDiff = Date.now() - recentOTP.createdAt.getTime();
-      const remainingSeconds = Math.ceil((60000 - timeDiff) / 1000);
       return res.status(429).json({
-        error: `Please wait ${remainingSeconds} seconds before requesting another OTP`,
+        error: 'Please wait 60 seconds before requesting another OTP',
       });
     }
 
     // Check hourly rate limit (5 OTPs per hour)
     const otpCount = await OTP.countDocuments({
       userId: user._id,
-      type,
+      type: 'password-reset',
       createdAt: { $gt: new Date(Date.now() - 3600000) },
     });
 
     if (otpCount >= 5) {
-      const action = type === 'password-reset' ? 'PASSWORD_RESET' : type.toUpperCase();
       await UserLog.create({
         email: user.email,
         username: user.username,
-        action,
+        action: 'PASSWORD_RESET',
         status: 'FAILED',
       });
       return res.status(429).json({
-        error: 'Too many OTP requests. Please try again later.',
+        error: 'Too many password reset requests. Please try again later.',
       });
     }
 
-    // Generate new OTP
+    // Generate 6-digit OTP
     const otp = generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Delete old OTPs for this user and type
-    await OTP.deleteMany({ userId: user._id, type });
+    // Delete old password-reset OTPs for this user
+    await OTP.deleteMany({ userId: user._id, type: 'password-reset' });
 
     // Store new OTP
     await OTP.create({
       userId: user._id,
       otp,
-      type,
+      type: 'password-reset',
       expiresAt,
       createdAt: new Date(),
     });
 
-    console.log('✅ OTP resent:', {
-      userId: user._id,
-      type,
-      otp: process.env.NODE_ENV === 'development' ? otp : '******',
-    });
+    // Send OTP email
+    const subject = 'TrackTag - Password Reset Code';
+    const html = getPasswordResetEmailTemplate(otp, user.username);
 
-    // Send OTP email based on type
     try {
-      if (type === 'login' || type === 'signup') {
-        const emailSent = await sendOTPEmail(user.email, otp, type as 'login' | 'signup');
-        
-        if (!emailSent) {
-          const action = type.toUpperCase();
-          await UserLog.create({
-            email: user.email,
-            username: user.username,
-            action,
-            status: 'FAILED',
-          });
-          return res.status(500).json({
-            error: 'Failed to send OTP email. Please try again.',
-          });
-        }
-      } else if (type === 'password-reset') {
-        const subject = 'TrackTag - Password Reset Code';
-        const html = getPasswordResetEmailTemplate(otp, user.username);
-        await sendHtmlEmail(user.email, subject, html);
-      }
+      await sendHtmlEmail(user.email, subject, html);
+      console.log(`Password reset OTP sent to ${user.email}`);
       
-      console.log(`OTP resent to ${user.email} for ${type}`);
-    } catch (emailError) {
-      console.error('Error resending OTP email:', emailError);
-      
-      const action = type === 'password-reset' ? 'PASSWORD_RESET' : type.toUpperCase();
+      // Log successful password reset request
       await UserLog.create({
         email: user.email,
         username: user.username,
-        action,
+        action: 'PASSWORD_RESET_REQUESTED',
+        status: 'SUCCESS',
+      });
+    } catch (emailError) {
+      console.error('Error sending password reset email:', emailError);
+      
+      await UserLog.create({
+        email: user.email,
+        username: user.username,
+        action: 'PASSWORD_RESET',
         status: 'FAILED',
       });
       
-      return res.status(500).json({ error: 'Failed to send OTP email. Please try again.' });
+      return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
     }
 
     // For development - log OTP
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🔐 Resent OTP for user ${user.username} (${type}): ${otp}`);
+      console.log(`🔐 Password reset OTP for ${user.username}: ${otp}`);
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'OTP sent successfully',
-      devOTP: process.env.NODE_ENV === 'development' ? otp : undefined,
+    return res.status(200).json({ 
+      message: 'Password reset OTP sent to your email',
+      userId: user._id.toString(),
     });
 
   } catch (error) {
-    console.error('Resend OTP error:', error);
-    return res.status(500).json({ error: 'Failed to resend OTP. Please try again.' });
+    console.error('Forgot password error:', error);
+    return res.status(500).json({ error: 'Internal server error. Please try again.' });
   }
 }
 

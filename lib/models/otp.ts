@@ -1,45 +1,32 @@
-import mongoose, { Schema, Document } from 'mongoose';
+// lib/models/otp.ts
+import mongoose from 'mongoose';
 
-export interface IOTP extends Document {
-  userId: mongoose.Types.ObjectId;
-  otp: string;
-  type: 'login' | 'signup';
-  expiresAt: Date;
-  createdAt: Date;
-}
-
-const OTPSchema = new Schema<IOTP>({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true,
+const otpSchema = new mongoose.Schema({
+  userId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
   },
-  otp: {
-    type: String,
-    required: true,
+  otp: { 
+    type: String, 
+    required: true 
   },
-  type: {
-    type: String,
-    enum: ['login', 'signup'],
-    required: true,
-    index: true,
+  type: { 
+    type: String, 
+    enum: ['login', 'signup', 'password-reset'], 
+    required: true 
   },
-  expiresAt: {
-    type: Date,
-    required: true,
-    index: true,
+  expiresAt: { 
+    type: Date, 
+    required: true 
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    index: true,
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
   },
 });
 
-// Compound index for efficient queries
-OTPSchema.index({ userId: 1, type: 1 });
-// MongoDB will automatically delete documents where expiresAt is in the past
-OTPSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Auto-delete expired OTPs
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const OTP = mongoose.models.OTP || mongoose.model<IOTP>('OTP', OTPSchema);
+export const OTP = mongoose.models.OTP || mongoose.model('OTP', otpSchema);

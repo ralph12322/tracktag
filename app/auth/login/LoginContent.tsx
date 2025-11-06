@@ -7,11 +7,14 @@ import toast from 'react-hot-toast';
 
 export default function LoginContent() {
   const router = useRouter();
-  const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
+  const [step, setStep] = useState<'credentials' | 'otp' | 'forgot-password' | 'reset-password'>('credentials');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [tempUserId, setTempUserId] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +29,6 @@ export default function LoginContent() {
       console.log('Login response:', data);
 
       if (res.ok) {
-        // Store temporary user ID and move to OTP step
         setTempUserId(data.userId);
         setStep('otp');
         toast.success('OTP sent! Check your email.');
@@ -72,12 +74,83 @@ export default function LoginContent() {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setTempUserId(data.userId);
+        setStep('reset-password');
+        toast.success('OTP sent to your email!');
+      } else {
+        toast.error(`${data.error}`);
+      }
+    } catch (error) {
+      console.error('Forgot password failed:', error);
+      toast.error('Failed to send reset email. Please try again.');
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long!');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: tempUserId,
+          otp,
+          newPassword 
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success('Password reset successful! Please login.');
+        setStep('credentials');
+        setUsername('');
+        setPassword('');
+        setOtp('');
+        setResetEmail('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        toast.error(`${data.error}`);
+      }
+    } catch (error) {
+      console.error('Password reset failed:', error);
+      toast.error('Password reset failed. Please try again.');
+    }
+  };
+
   const handleResendOtp = async () => {
     try {
       const res = await fetch('/api/auth/resend-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: tempUserId, type: 'login' }),
+        body: JSON.stringify({ 
+          userId: tempUserId, 
+          type: step === 'otp' ? 'login' : 'password-reset'
+        }),
       });
 
       if (res.ok) {
@@ -119,9 +192,12 @@ export default function LoginContent() {
           {/* Title */}
           <div className="mb-8">
             <h2 className="text-4xl font-black mb-2 bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
-              {step === 'credentials' ? 'Login to TrackTag' : 'Verify OTP'}
+              {step === 'credentials' && 'Login to TrackTag'}
+              {step === 'otp' && 'Verify OTP'}
+              {step === 'forgot-password' && 'Forgot Password'}
+              {step === 'reset-password' && 'Reset Password'}
             </h2>
-            {step === 'credentials' ? (
+            {step === 'credentials' && (
               <p className="text-slate-300 text-sm font-light">
                 Don't have an account?{' '}
                 <Link 
@@ -131,9 +207,20 @@ export default function LoginContent() {
                   Sign up
                 </Link>
               </p>
-            ) : (
+            )}
+            {step === 'otp' && (
               <p className="text-slate-300 text-sm font-light">
                 Enter the 6-digit code sent to your email
+              </p>
+            )}
+            {step === 'forgot-password' && (
+              <p className="text-slate-300 text-sm font-light">
+                Enter your email to receive a password reset OTP
+              </p>
+            )}
+            {step === 'reset-password' && (
+              <p className="text-slate-300 text-sm font-light">
+                Enter the OTP and your new password
               </p>
             )}
           </div>
@@ -165,6 +252,16 @@ export default function LoginContent() {
                     className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
                   />
                 </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setStep('forgot-password')}
+                  className="text-sm text-teal-400 hover:text-teal-300 transition-colors duration-300 font-semibold"
+                >
+                  Forgot Password?
+                </button>
               </div>
 
               <button
@@ -208,6 +305,110 @@ export default function LoginContent() {
                   className="text-slate-400 hover:text-teal-400 transition-colors duration-300"
                 >
                   ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-teal-400 hover:text-teal-300 transition-colors duration-300 font-semibold"
+                >
+                  Resend OTP
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Forgot Password Form */}
+          {step === 'forgot-password' && (
+            <form className="space-y-5" onSubmit={handleForgotPassword}>
+              <div className="relative group/input">
+                <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                <input
+                  type="email"
+                  required
+                  placeholder="Enter your email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="relative group/btn w-full flex justify-center py-3 px-4 rounded-xl font-semibold text-slate-900 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-slate-900 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+              >
+                <span className="relative z-10">Send Reset OTP</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-xl blur-lg opacity-0 group-hover/btn:opacity-50 transition-opacity duration-300"></div>
+              </button>
+
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setStep('credentials')}
+                  className="text-sm text-slate-400 hover:text-teal-400 transition-colors duration-300"
+                >
+                  ← Back to Login
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Reset Password Form */}
+          {step === 'reset-password' && (
+            <form className="space-y-5" onSubmit={handleResetPassword}>
+              <div className="space-y-4">
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter 6-digit OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 text-center text-xl tracking-widest font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="password"
+                    required
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+
+                <div className="relative group/input">
+                  <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl blur-md opacity-0 group-hover/input:opacity-10 transition-opacity duration-300"></div>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Confirm New Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="relative appearance-none rounded-xl w-full px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="relative group/btn w-full flex justify-center py-3 px-4 rounded-xl font-semibold text-slate-900 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:ring-offset-slate-900 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+              >
+                <span className="relative z-10">Reset Password</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-xl blur-lg opacity-0 group-hover/btn:opacity-50 transition-opacity duration-300"></div>
+              </button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => setStep('credentials')}
+                  className="text-slate-400 hover:text-teal-400 transition-colors duration-300"
+                >
+                  ← Back to Login
                 </button>
                 <button
                   type="button"
