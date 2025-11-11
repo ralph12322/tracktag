@@ -46,7 +46,7 @@ export default function UserProfile() {
     message: '',
   });
   const [togglingId, setTogglingId] = useState<string | null>(null);
-
+  const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
 
   useEffect(() => {
@@ -128,6 +128,13 @@ export default function UserProfile() {
     }
   };
 
+  // Filter products based on search query
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.currentPrice.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.originalPrice.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleShowMore = () => {
     setVisibleCount((prev) => prev + 5);
   };
@@ -136,7 +143,7 @@ export default function UserProfile() {
     setVisibleCount(10);
   };
 
-  const visibleProducts = products.slice(0, visibleCount);
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
   const handleLogout = async () => {
     try {
@@ -334,15 +341,58 @@ export default function UserProfile() {
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
               <div className="relative bg-slate-800/40 backdrop-blur-xl shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-teal-500/30">
-                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                  <div className="flex gap-2">
-                    <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse"></span>
-                    <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 animate-pulse animation-delay-150"></span>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex gap-2">
+                      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                      <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 animate-pulse animation-delay-150"></span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-cyan-300 to-teal-300 bg-clip-text text-transparent">
+                      Your Tracked Products
+                    </h2>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-cyan-300 to-teal-300 bg-clip-text text-transparent">
-                    Your Tracked Products
-                  </h2>
+
+                  {/* Search Bar */}
+                  {products.length > 0 && (
+                    <div className="relative w-full sm:w-auto sm:min-w-[300px]">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setVisibleCount(10); // Reset visible count when searching
+                        }}
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-900/50 border border-teal-500/30 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all backdrop-blur-xl"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setVisibleCount(10);
+                          }}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-teal-300 transition-colors"
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
+
+                {/* Search Results Info */}
+                {searchQuery && (
+                  <div className="mb-4 text-sm text-slate-400">
+                    Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} matching "{searchQuery}"
+                  </div>
+                )}
 
                 {products.length === 0 ? (
                   <div className="text-center py-12 sm:py-16">
@@ -350,6 +400,19 @@ export default function UserProfile() {
                       <span className="text-3xl sm:text-4xl">📦</span>
                     </div>
                     <p className="text-slate-400 text-base sm:text-lg">No products tracked yet.</p>
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="text-center py-12 sm:py-16">
+                    <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-700/40 border border-teal-500/30 mb-4">
+                      <span className="text-3xl sm:text-4xl">🔍</span>
+                    </div>
+                    <p className="text-slate-400 text-base sm:text-lg">No products found matching your search.</p>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="mt-4 text-teal-400 hover:text-teal-300 font-semibold transition-colors"
+                    >
+                      Clear search
+                    </button>
                   </div>
                 ) : (
                   <>
@@ -517,9 +580,9 @@ export default function UserProfile() {
                       </table>
                     </div>
 
-                    {(visibleCount < products.length || visibleCount > 10) && (
+                    {(visibleCount < filteredProducts.length || visibleCount > 10) && (
                       <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-                        {visibleCount < products.length && (
+                        {visibleCount < filteredProducts.length && (
                           <button
                             onClick={handleShowMore}
                             className="px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-teal-500/20 transform hover:scale-105"
