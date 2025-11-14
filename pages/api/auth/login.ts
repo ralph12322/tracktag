@@ -3,8 +3,7 @@ import bcrypt from 'bcrypt';
 import { User } from '@/lib/models/user';
 import { connectToDB } from '../start';
 import { UserLog } from '@/lib/models/userLog';
-import { generateOTP, sendOTPEmail } from '@/lib/alerts/gmail';
-import { OTP } from '@/lib/models/otp';
+import { generateToken } from '@/lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -52,59 +51,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         needsVerification: true,
       });
     }
-
-    // 5. Generate OTP
-    const otp = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    // 6. Delete old login OTPs for this user
-    await OTP.deleteMany({ userId: user._id, type: 'login' });
-
-    // 7. Store new OTP
-    const otpRecord = await OTP.create({
-      userId: user._id,
-      otp,
-      type: 'login',
-      expiresAt,
-      createdAt: new Date(),
+    const token = generateToken(user);
+    res.setHeader('Set-Cookie', `authToken=${token}; HttpOnly; Path=/; Max-Age=604800; SameSite=Strict; Secure`);
+    await UserLog.create({
+      email: user.email,
+      username: user.username,
+      action: 'LOGIN',
+      status: 'SUCCESS',
     });
 
-    console.log('✅ OTP created in database:', {
-      otpId: otpRecord._id,
-      userId: user._id,
-      otp: process.env.NODE_ENV === 'development' ? otp : '******',
-      expiresAt
-    });
-
-    // 8. Send OTP via email
-    console.log(`📧 Attempting to send OTP to: ${user.email}`);
-    const emailSent = await sendOTPEmail(user.email, otp, 'login');
-
-    if (!emailSent) {
-      // Clean up OTP if email fails
-      await OTP.deleteOne({ _id: otpRecord._id });
-      
-      console.error('❌ Failed to send OTP email');
-      return res.status(500).json({
-        error: 'Failed to send OTP. Please try again.',
-      });
-    }
-
-    console.log('✅ OTP email sent successfully');
-
-    // For development - log OTP to console
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔐 LOGIN OTP for ${user.username}: ${otp}`);
-      console.log(`⏰ Expires at: ${expiresAt}`);
-    }
-
-    // 9. Return success with userId (CRITICAL: Your frontend needs this!)
     return res.status(200).json({
       success: true,
       userId: user._id.toString(),
       id: user._id.toString(), // For backwards compatibility
-      message: 'OTP sent to your email',
-      devOTP: process.env.NODE_ENV === 'development' ? otp : undefined,
     });
 
   } catch (error) {

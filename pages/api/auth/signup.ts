@@ -20,8 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!emailRegex.test(email))
       return res.status(400).json({ error: "Invalid email format" });
 
-    if (password.length < 6)
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    if (password.length < 8)
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
 
     // Check if user or pending user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
