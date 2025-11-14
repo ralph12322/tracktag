@@ -29,6 +29,7 @@ const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [showHero, setShowHero] = useState(true);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,6 +51,23 @@ const Home = () => {
 
     fetchUser();
   }, [router]);
+
+  useEffect(() => {
+    const fetchTotalProducts = async () => {
+      try {
+        const res = await fetch('/api/admin/allproducts', { headers: { 'Cache-Control': 'no-store' } });
+        if (res.ok) {
+          const data = await res.json();
+          setTotalProducts(data.count);
+          console.log('Total products fetched:', data.count);
+        }
+      } catch (error) {
+        console.error('Failed to fetch total products:', error);
+      }
+    };
+
+    fetchTotalProducts();
+  }, []);
 
   useEffect(() => {
     const cached = sessionStorage.getItem("trendingProducts");
@@ -152,7 +170,7 @@ const Home = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  <span className="font-medium text-slate-300">Note:</span> Our database currently contains historical data for apparel products only. Items beyond this category are not yet tracked.
+                  <span className="font-medium text-slate-300">Note:</span> Our database currently contains historical data for apparel products only. Items beyond this category are not yet tracked. <span className="font-medium text-slate-300">{totalProducts}</span> products tracked so far!
                 </p>
               </div>
             </div>
