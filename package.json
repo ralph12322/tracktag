@@ -28,7 +28,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.545.0",
     "mongoose": "^8.16.1",
-    "next": "15.3.3",
+    "next": "^15.5.9",
     "proxy-chain": "^2.5.9",
     "puppeteer": "^24.24.0",
     "puppeteer-core": "^24.24.1",
