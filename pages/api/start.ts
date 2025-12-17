@@ -1,7 +1,8 @@
 // @/pages/api/start.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from "mongoose";
 
-let isConnected = false; // Track connection status
+let isConnected = false;
 
 export async function connectToDB() {
     mongoose.set('strictQuery', true);
@@ -25,15 +26,22 @@ export async function connectToDB() {
     }
 }
 
-// Optional: Handle connection events
+// Add this handler to make it a valid API route
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  await connectToDB();
+  res.status(200).json({ connected: isConnected });
+}
+
+// Connection events
 mongoose.connection.on('connected', () => {
     isConnected = true;
-    console.log('MongoDB connection established');
 });
 
 mongoose.connection.on('disconnected', () => {
     isConnected = false;
-    console.log('MongoDB connection disconnected');
 });
 
 mongoose.connection.on('error', (err) => {
