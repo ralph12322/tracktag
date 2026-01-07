@@ -69,7 +69,7 @@ const DisplayProduct = ({ product }: Props) => {
 
   useEffect(() => {
     //this is not being used due to the not having an automated cron job for this because of large costs
-    
+
     // const fetchPriceHistory = async () => {
     //   if (!product) {
     //     setPriceHistory([]);
@@ -111,17 +111,21 @@ const DisplayProduct = ({ product }: Props) => {
       const now = new Date();
       const currentMonth = now.toLocaleString('default', { month: 'short' });
 
-      
+
       for (let i = 0; i < 12; i++) {
         const month = new Date(2023, i, 1).toLocaleString('default', { month: 'short' });
-        const price = Math.random() * 100 + toNumber(product.currentPrice);
+        const r = Math.random();
+        const price = (r > 0.7 && r < 0.9)
+          ? toNumber(product.originalPrice)
+          : toNumber(product.currentPrice) + (Math.random() * 100 - 50);
+
         history.push({ month, price: parseFloat(price.toFixed(2)) });
       }
 
-      
+
       const index = history.findIndex(h => h.month === currentMonth);
 
-      
+
       if (index !== -1) {
         history[index] = {
           month: currentMonth,
