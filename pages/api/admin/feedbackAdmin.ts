@@ -1,4 +1,3 @@
-// pages/api/feedback.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../start';
 import { Feedback } from '@/lib/models/feedback';

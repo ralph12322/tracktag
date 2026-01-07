@@ -1,4 +1,3 @@
-// pages/api/auth/reset-password.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../start';
 import { User } from '@/lib/models/user';

@@ -1,4 +1,3 @@
-// pages/api/auth/resend-otp.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '../start';
 import { User } from '@/lib/models/user';

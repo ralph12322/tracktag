@@ -1,4 +1,3 @@
-// @/pages/api/start.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from "mongoose";
 

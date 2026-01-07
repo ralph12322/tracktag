@@ -68,36 +68,72 @@ const DisplayProduct = ({ product }: Props) => {
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
   useEffect(() => {
-    const fetchPriceHistory = async () => {
+    //this is not being used due to the not having an automated cron job for this because of large costs
+    
+    // const fetchPriceHistory = async () => {
+    //   if (!product) {
+    //     setPriceHistory([]);
+    //     return;
+    //   }
+
+    //   setIsLoadingHistory(true);
+    //   try {
+    //     const response = await fetch(
+    //       `/api/price-history?title=${encodeURIComponent(product.title)}&platform=${encodeURIComponent(product.platform)}`
+    //     );
+
+    //     if (response.ok) {
+    //       const result = await response.json();
+    //       if (result.success && result.data) {
+    //         setPriceHistory(result.data);
+    //       }
+    //     } else {
+    //       console.error('Failed to fetch price history');
+    //       setPriceHistory([]);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching price history:', error);
+    //     setPriceHistory([]);
+    //   } finally {
+    //     setIsLoadingHistory(false);
+    //   }
+    // };
+
+    //fetchPriceHistory();
+
+    const generateMockPriceHistory = () => {
       if (!product) {
         setPriceHistory([]);
         return;
       }
 
-      setIsLoadingHistory(true);
-      try {
-        const response = await fetch(
-          `/api/price-history?title=${encodeURIComponent(product.title)}&platform=${encodeURIComponent(product.platform)}`
-        );
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setPriceHistory(result.data);
-          }
-        } else {
-          console.error('Failed to fetch price history');
-          setPriceHistory([]);
-        }
-      } catch (error) {
-        console.error('Error fetching price history:', error);
-        setPriceHistory([]);
-      } finally {
-        setIsLoadingHistory(false);
+      const history: PriceHistoryData[] = [];
+      const now = new Date();
+      const currentMonth = now.toLocaleString('default', { month: 'short' });
+
+      
+      for (let i = 0; i < 12; i++) {
+        const month = new Date(2023, i, 1).toLocaleString('default', { month: 'short' });
+        const price = Math.random() * 100 + toNumber(product.currentPrice);
+        history.push({ month, price: parseFloat(price.toFixed(2)) });
       }
+
+      
+      const index = history.findIndex(h => h.month === currentMonth);
+
+      
+      if (index !== -1) {
+        history[index] = {
+          month: currentMonth,
+          price: parseFloat(product.currentPrice),
+        };
+      }
+
+      setPriceHistory(history);
     };
 
-    fetchPriceHistory();
+    generateMockPriceHistory();
+
   }, [product]);
 
   // Initialize and update ECharts
@@ -130,7 +166,7 @@ const DisplayProduct = ({ product }: Props) => {
         formatter: (params: any) => {
           // Find the price series (the second series, index 1)
           const priceData = params.length > 1 ? params[1] : params[0];
-          
+
           return `
             <div style="padding: 4px;">
               <div style="color: #94a3b8; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">${priceData.name}</div>
@@ -383,8 +419,8 @@ const DisplayProduct = ({ product }: Props) => {
   const avgPrice = prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0;
 
   // Calculate price change percentage
-  const priceChange = prices.length >= 2 
-    ? ((prices[prices.length - 1] - prices[0]) / prices[0]) * 100 
+  const priceChange = prices.length >= 2
+    ? ((prices[prices.length - 1] - prices[0]) / prices[0]) * 100
     : 0;
   const isPositiveChange = priceChange >= 0;
 
@@ -476,7 +512,7 @@ const DisplayProduct = ({ product }: Props) => {
               </svg>
               Price History
             </h3>
-            
+
             {priceHistory.length > 0 && (
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex flex-col items-center px-3 py-2 bg-slate-800/60 rounded-lg border border-slate-700/50">
@@ -500,7 +536,7 @@ const DisplayProduct = ({ product }: Props) => {
               </div>
             )}
           </div>
-          
+
           {isLoadingHistory ? (
             <div className="h-64 sm:h-80 w-full flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">

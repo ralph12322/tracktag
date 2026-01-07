@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDB } from '@/pages/api/start';
-import { UserLog } from '@/lib/models/userLog'; // Assuming you have a UserLog model defined
+import { UserLog } from '@/lib/models/userLog';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).end();

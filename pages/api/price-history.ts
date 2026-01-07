@@ -1,4 +1,3 @@
-// API Route: /pages/api/price-history.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import mongoose from "mongoose";
 import { connectToDB } from "@/pages/api/start";

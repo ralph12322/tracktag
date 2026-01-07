@@ -23,7 +23,7 @@ interface Product {
 
 const runningRequests = new Map<string, boolean>();
 
-/** Delay helper function */
+// Delay helper function
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 function loadLazadaCookiesFromFile(cookieFile?: string) {
@@ -56,7 +56,7 @@ function loadLazadaCookiesFromFile(cookieFile?: string) {
   }
 }
 
-/** 2Captcha solver */
+// 2Captcha solver
 async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string> {
   const API_KEY = process.env.TWO_CAPTCHA_API_KEY;
   if (!API_KEY) throw new Error('Missing TWO_CAPTCHA_API_KEY');
@@ -78,7 +78,7 @@ async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string>
   throw new Error('Captcha solve timeout');
 }
 
-/** Auto login to Lazada and save cookies (with 2Captcha support) */
+//Auto login to Lazada and save cookies (with 2Captcha support)
 async function loginAndGetCookies(page: Page) {
   console.log('🔐 Logging into Lazada...');
 

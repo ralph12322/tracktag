@@ -1,4 +1,3 @@
-// lib/scraper/index.ts
 import dotenv from 'dotenv';
 dotenv.config();
 import Sentiment from 'sentiment';
@@ -9,17 +8,6 @@ import axios from 'axios';
 
 const pluginStealth = StealthPlugin();
 puppeteer.use(pluginStealth);
-
-/**
- * Environment variables expected:
- * BRIGHT_DATA_USERNAME - full proxy username from Bright Data (zone username)
- * BRIGHT_DATA_PASSWORD - proxy password
- * BRIGHTDATA_PROXY_HOST - default 'brd.superproxy.io'
- * BRIGHTDATA_PROXY_PORT - default '33335'
- * LAZADA_COOKIES_FILE  - path to JSON file of Lazada cookies (array)
- * TWO_CAPTCHA_API_KEY  - (optional) for solveRecaptcha
- * HEADLESS             - 'true' or 'false' (optional)
- */
 
 const sentiment = new Sentiment();
 
@@ -41,10 +29,10 @@ function getEnvVar(name: string) {
   return v;
 }
 
-/** Delay helper function to replace page.waitForTimeout */
+// Delay helper function to replace page.waitForTimeout
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-/** Load lazada cookies JSON and convert to Puppeteer Cookie format */
+// Load lazada cookies JSON and convert to Puppeteer Cookie format
 function loadLazadaCookiesFromFile(cookieFile?: string) {
   const defaultPath = cookieFile || process.env.LAZADA_COOKIES_FILE || './secrets/lazada_cookies.json';
   if (!fs.existsSync(defaultPath)) {
@@ -75,7 +63,7 @@ function loadLazadaCookiesFromFile(cookieFile?: string) {
   }
 }
 
-/** 2Captcha solver (left as you had it) */
+// 2Captcha solver (left as you had it)
 async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string> {
   const API_KEY = process.env.TWO_CAPTCHA_API_KEY;
   if (!API_KEY) throw new Error('Missing TWO_CAPTCHA_API_KEY');
@@ -97,7 +85,7 @@ async function solveRecaptcha(sitekey: string, pageurl: string): Promise<string>
   throw new Error('Captcha solve timeout');
 }
 
-/** Auto login to Lazada and save cookies (with 2Captcha support) */
+// Auto login to Lazada and save cookies (with 2Captcha support)
 async function loginAndGetCookies(page: any) {
   console.log('🔐 Logging into Lazada...');
 
@@ -173,7 +161,7 @@ function analyzeSentiment(texts: string[]) {
   return verdict;
 }
 
-// ---------------------- Main scraper ----------------------
+// Main scraper 
 export async function scrapeProduct(url: string): Promise<ProductData | null> {
   if (!url) return null;
 
@@ -211,7 +199,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
     await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-PH,en;q=0.9' });
     page.setDefaultNavigationTimeout(180000);
 
-    // --------------- Lazada Logic ---------------
+    // Lazada Logic
     if (url.includes('lazada.')) {
       try {
         let cookies = loadLazadaCookiesFromFile();
@@ -435,7 +423,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
       }
     }
 
-    // --------------- Amazon Logic (Enhanced with Reviews) ---------------
+    // Amazon Logic
     if (url.includes('amazon.')) {
       try {
         // Force USD currency by setting cookies and visiting currency preference page
@@ -608,7 +596,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
 
           if (structuredPrice) {
             currentPrice = structuredPrice;
-            console.log('✅ Extracted price from structured data:', currentPrice);
+            console.log('Extracted price from structured data:', currentPrice);
           }
         }
 
@@ -625,12 +613,12 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           currentPrice = currentPrice.trim();
           // If it's PHP, you might want to convert or flag it
           if (currentPrice.includes('PHP')) {
-            console.warn('⚠️ Price detected in PHP, not USD:', currentPrice);
+            console.warn('Price detected in PHP, not USD:', currentPrice);
             // Optional: You could convert PHP to USD or skip this product
           }
         }
 
-        console.log('✅ Amazon Prices extracted:', { currentPrice, discountRate, normalPrice });
+        console.log('Amazon Prices extracted:', { currentPrice, discountRate, normalPrice });
 
         // Extract image
         const imageUrl = await page.evaluate(() => {
@@ -670,13 +658,13 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
           });
 
           if (reviewsLinkClicked) {
-            console.log("✅ Clicked Amazon reviews link");
+            console.log("Clicked Amazon reviews link");
             await delay(3000);
             await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 }).catch(() => {
               console.log("Navigation to reviews page...");
             });
           } else {
-            console.warn("⚠️ Reviews link not found, scrolling to reviews section");
+            console.warn("Reviews link not found, scrolling to reviews section");
 
             await page.evaluate(() => {
               const reviewSection = document.querySelector('#reviewsMedley, #reviews, [data-hook="reviews-medley"]');
@@ -688,7 +676,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
 
           await delay(3000);
         } catch (err) {
-          console.warn("⚠️ Failed to navigate to reviews:", err);
+          console.warn("Failed to navigate to reviews:", err);
         }
 
         // Scroll to load more reviews
@@ -832,7 +820,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
         };
 
         await browser.close();
-        console.log('✅ Successfully scraped Amazon product:', {
+        console.log('Successfully scraped Amazon product:', {
           title: productData.title.substring(0, 50) + '...',
           currentPrice: productData.currentPrice,
           reviewCount: reviews.length
@@ -850,7 +838,7 @@ export async function scrapeProduct(url: string): Promise<ProductData | null> {
       }
     }
 
-    // --------------- Generic fallback ---------------
+    // Generic fallback 
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
     const title = await page.title();
 
