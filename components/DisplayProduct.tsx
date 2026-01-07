@@ -110,14 +110,16 @@ const DisplayProduct = ({ product }: Props) => {
       const history: PriceHistoryData[] = [];
       const now = new Date();
       const currentMonth = now.toLocaleString('default', { month: 'short' });
-
+      const sub = product.platform === "Amazon" ? 2 : 50;
+      const multiplier = product.platform === "Amazon" ? 10 : 100;
+      const original = product.originalPrice ? toNumber(product.originalPrice) : toNumber(product.currentPrice);
 
       for (let i = 0; i < 12; i++) {
         const month = new Date(2023, i, 1).toLocaleString('default', { month: 'short' });
         const r = Math.random();
         const price = (r > 0.7 && r < 0.9)
-          ? toNumber(product.originalPrice)
-          : toNumber(product.currentPrice) + (Math.random() * 100 - 50);
+          ? original
+          : toNumber(product.currentPrice) + (Math.random() * multiplier - sub);
 
         history.push({ month, price: parseFloat(price.toFixed(2)) });
       }
@@ -129,7 +131,7 @@ const DisplayProduct = ({ product }: Props) => {
       if (index !== -1) {
         history[index] = {
           month: currentMonth,
-          price: parseFloat(product.currentPrice),
+          price: toNumber(product.currentPrice),
         };
       }
 
